@@ -49,7 +49,7 @@ export default {
     this.id = this.$route.params.id
 
     const com = await axios.get(
-      env.endpoint + '/datosComercio.php?id=' + this.id
+      env.endpoint + '/datosRestaurante.php?id=' + this.id
     )
     /*     this.comercio = com.data.data[0]
      */

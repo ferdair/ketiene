@@ -117,7 +117,7 @@ export default {
   /*     background: url('~@/static/3.png') no-repeat center center;
  */
   background-size: cover;
-  background-color: red;
+  background-color: #d0d0d0;
   transform: scale(1.1);
 }
 </style>

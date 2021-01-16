@@ -500,7 +500,7 @@ export default {
     },
     async enviarJson() {
       const j = await axios.put(
-        env.endpoint + '/datosComercio.php',
+        env.endpoint + '/datosRestaurante.php',
         this.jsonenv
       )
 
@@ -536,7 +536,7 @@ export default {
 
     // DATOS COMERCIO
     const com = await axios.get(
-      env.endpoint + '/datosComercio.php?id=' + this.id
+      env.endpoint + '/datosRestaurante.php?id=' + this.id
     )
 
     this.tipoRestaurante = com.data.data[0].idTipoComercio

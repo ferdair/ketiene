@@ -927,7 +927,7 @@ export default {
       this.kmasTiene.splice(i, 1)
     },
     enviarJson() {
-      const j = axios.post(env.endpoint + '/datosComercio.php', this.jsonenv)
+      const j = axios.post(env.endpoint + '/datosRestaurante.php', this.jsonenv)
 
       if (j.data.code === 200) {
         this.error = true

@@ -1,6 +1,5 @@
 <template>
   <v-container>
-    <nuxt-child />
     <v-row>
       <v-col cols="12" md="8">
         <v-card class="mx-auto" outlined>
@@ -11,7 +10,8 @@
               class="grey lighten-3 rounded-lg"
               align-self="center"
             >
-              <v-icon x-large color="grey darken-1"> mdi-store </v-icon>
+              <v-img :src="comercio.imagenLogo"></v-img>
+              <!-- <v-icon x-large color="grey darken-1"> mdi-store </v-icon> -->
             </v-col>
             <v-col cols="8" md="11">
               <h3>{{ comercio.nombre }}</h3>
@@ -168,7 +168,7 @@ export default {
     this.id = this.$route.params.id
 
     const com = await axios.get(
-      env.endpoint + '/datosComercio.php?id=' + this.id
+      env.endpoint + '/datosRestaurante.php?id=' + this.id
     )
     this.comercio = com.data.data[0]
 

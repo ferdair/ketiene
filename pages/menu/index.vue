@@ -3,8 +3,7 @@
 </template>
 
 <script>
-export default {
-  name: 'Index',
-  auth: false,
-}
+export default {}
 </script>
+
+<style></style>

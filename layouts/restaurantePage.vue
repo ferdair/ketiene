@@ -127,7 +127,7 @@ import { mapGetters } from 'vuex'
 import Footer from '@/components/footer'
 
 export default {
-  name: 'AdminPage',
+  name: 'RestaurantePage',
 
   data: () => ({
     param: null,

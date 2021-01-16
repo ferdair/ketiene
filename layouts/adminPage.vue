@@ -28,6 +28,15 @@
               <v-list-item-title>{{ item.title }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+
+          <v-list-item>
+            <v-list-item-icon>
+              <v-icon>mdi-headset</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title> Contactar a soporte </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
       </v-navigation-drawer>
 
@@ -78,7 +87,7 @@ import Footer from '@/components/footer'
 export default {
   data: () => ({
     name: 'AdminPage',
-    drawer: false,
+    drawer: true,
     user: {
       initials: '',
       fullName: '',
@@ -91,39 +100,34 @@ export default {
         path: '/admin',
         target: '_self',
       },
-      /*  {
-        title: 'Vitrinas',
-        icon: 'mdi-store',
-        path: '/comercio/vitrinas',
+      {
+        title: 'Eventos Deportivos',
+        icon: 'mdi-soccer',
+        path: '/admin',
         target: '_self',
       },
       {
-        title: 'Promociones',
-        icon: 'mdi-piggy-bank',
-        path: '/comercio/promociones',
+        title: 'Publicidad y/o frases',
+        icon: 'mdi-bullhorn',
+        path: '/admin',
         target: '_self',
-      }, */
-      /*  {
-        title: 'Productos',
-        icon: 'mdi-package-variant',
-        path: '/comercio/productos',
-      }, */
-      /*  {
+      },
+      {
+        title: 'Datos Ke Tiene',
+        icon: 'mdi-bullhorn',
+        path: '/admin',
+        target: '_self',
+      },
+      {
         title: 'Estadísticas',
-        icon: 'mdi-chart-areaspline-variant',
-        path: '/comercio/estadisticas',
+        icon: 'mdi-chart-bar',
+        path: '/admin',
         target: '_self',
-      }, */
-      /*  {
-        title: 'Generador de catálogo',
-        icon: 'mdi-pdf-box',
-        path: 'http://cityemark.com/pdfTutorial/app/index.php?id=48',
-        target: '_blank	',
-      }, */
+      },
       /*  {
         title: 'Contactar a soporte',
-        icon: 'mdi-help-box',
-        path: '/comercio/soporte',
+        icon: 'mdi-headset',
+        path: '/admin',
         target: '_self',
       }, */
     ],
