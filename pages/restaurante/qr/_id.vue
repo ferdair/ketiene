@@ -23,7 +23,12 @@
           Puede colocar este QR en cualquier lugar donde no necesite uno de los
           de abajo
         </p>
-        <v-btn color="#f45c04" dark> Descargar </v-btn>
+        <a
+          class="v-btn v-btn--is-elevated v-btn--has-bg naranja v-size--default warning"
+          :href="`https://qooworklab.com/ketiene/apis/generarImageQR.php?id=${id}`"
+          target="_blank"
+          >DESCARGAR</a
+        >
       </v-col>
     </v-row>
   </v-container>

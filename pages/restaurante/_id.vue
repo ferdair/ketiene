@@ -54,12 +54,22 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" md="4" class="text-center">
-        <qrcode-vue :value="link" size="300" level="H"></qrcode-vue>
-        Vista previa
+    <v-row justify="center">
+      <v-col cols="12" md="3" class="text-center">
+        <v-col cols="12" md="12" align-self="center">
+          <v-card>
+            <qrcode-vue :value="link" size="200" level="H"></qrcode-vue><br />
+            Vista Previa
+          </v-card>
+        </v-col>
+        <v-col cols="12" md="12">
+          <v-card to="/admin">
+            <v-icon size="100"> mdi-account-cog </v-icon><br />
+            Volver al Inicio Admin
+          </v-card>
+        </v-col>
       </v-col>
-      <v-col cols="12" md="8">
+      <v-col cols="12" md="9">
         <v-row>
           <h1>Primeros pasos</h1>
           <v-subheader> Configure su tienda en pocos minutos </v-subheader>

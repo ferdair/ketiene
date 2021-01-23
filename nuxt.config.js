@@ -1,4 +1,7 @@
 import colors from 'vuetify/es5/util/colors'
+// import CustomIcon from '@/components/CustomIcon.vue'
+
+// import ketiene from '@/components/ketiene'
 
 export default {
   // Target (https://go.nuxtjs.dev/config-target)
@@ -36,6 +39,7 @@ export default {
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
     // https://go.nuxtjs.dev/axios
+    'vue-sweetalert2/nuxt',
     '@nuxtjs/axios',
     '@nuxtjs/auth',
     [
@@ -80,6 +84,14 @@ export default {
         },
       },
     },
+    /*  icons: {
+      values: {
+        custom: {
+          // name of our custom icon
+          component: CustomIcon, // our custom component
+        },
+      },
+    }, */
   },
   router: {
     /*     middleware: ['auth'],

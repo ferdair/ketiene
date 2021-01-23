@@ -84,7 +84,12 @@
             <h3>{{ catC.nombreTipoProducto }}</h3>
             <v-spacer></v-spacer>
             <v-btn text :to="`/menu/items/${idC}`">Ver items</v-btn>
-            <v-btn icon><v-icon>mdi-pencil</v-icon></v-btn>
+            <v-btn icon @click="alertEliminar(catC.idTipoProductoComercio)"
+              ><v-icon>mdi-delete</v-icon></v-btn
+            >
+            <v-btn icon @click="editarCat(catC.idTipoProductoComercio)"
+              ><v-icon>mdi-pencil</v-icon></v-btn
+            >
             <v-switch
               v-model="catC.estado"
               @change="
@@ -100,13 +105,13 @@
     <v-row justify="center">
       <v-dialog v-model="dialog" persistent max-width="350">
         <v-card>
-          <v-card-title class="headline"> Agregar Categoría </v-card-title>
+          <v-card-title class="headline"> Nueva Categoría </v-card-title>
           <v-card-text>
             <v-form ref="form" v-model="valid" lazy-validation>
               <v-text-field
                 v-model="nombreCat"
                 :rules="nombreCatRules"
-                label="Nombre de la categoría"
+                label="Nombre"
                 required
                 outlined
                 v-if="mostrarNuevaCat === true"
@@ -124,9 +129,9 @@
                 @change="mostrarFormCategoria"
               >
               </v-autocomplete>
-              <v-autocomplete
+              <!--  <v-autocomplete
                 outlined
-                label="icono"
+                label="Ícono"
                 :items="iconos2"
                 v-model="iconoCat"
                 :rules="iconoCatRules"
@@ -138,29 +143,36 @@
                 <template slot="item" slot-scope="{ item }">
                   <v-icon> {{ item }} </v-icon>
                 </template>
-              </v-autocomplete>
+              </v-autocomplete> -->
             </v-form>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="cerrarDialog">
-              Cancelar
-            </v-btn>
             <v-btn
-              color="green darken-1"
+              color="red"
               text
-              @click="registrarCategoriaComercio(categoria)"
-              v-if="mostrarNuevaCat === false"
+              @click="eliminarCat()"
+              v-if="editando === true"
             >
-              Agregar
+              <v-icon left>mdi-delete</v-icon>
+              Eliminar
+            </v-btn>
+            <v-btn text @click="cerrarDialog"> Cancelar </v-btn>
+            <v-btn
+              color="#f45c04"
+              @click="registrarCategoriaComercio()"
+              v-if="mostrarNuevaCat === false"
+              dark
+            >
+              Guardar
             </v-btn>
             <v-btn
-              color="green darken-1"
-              text
+              color="#f45c04"
               @click="registrarCategoria()"
               v-if="mostrarNuevaCat === true"
+              dark
             >
-              Agregar
+              Guardar
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -186,8 +198,10 @@ export default {
   name: 'categorias',
   layout: 'restaurantePage',
   data: () => ({
+    idtpc: 0,
     valid: true,
     error: false,
+    editando: false,
     error_msg: '',
     dialog: false,
     categoria: null,
@@ -242,6 +256,7 @@ export default {
     categoriasC: [],
     categorias: [],
     mostrarNuevaCat: false,
+    auxEstado: true,
   }),
   async mounted() {
     // id Comercio
@@ -252,12 +267,23 @@ export default {
       env.endpoint + '/tipoProductoComercio.php?id=' + this.idC
     )
 
-    this.categoriasC = cc.data.data /* .filter((a) => a.estado === 0) */
+    if (cc.data.data === false) {
+      this.categoriasC = []
+    } else {
+      this.categoriasC = cc.data.data.filter((a) => a.estado !== 3)
+    }
+
+    // this.categoriasC = cc.data.data.filter((a) => a.estado !== 3)
     /* this.categoriasC.splice(0, 0, {
       idTipoProductoComercio: 0,
       nombreTipoProducto: 'Otro',
     }) */
-    this.formatearEstadoCategoria()
+
+    if (this.categoriasC !== false) {
+      this.formatearEstadoCategoria()
+    } else {
+      this.categoriasC = []
+    }
     // Categorías
     const c = await axios.get(env.endpoint + '/tipoProducto.php')
     this.categorias = c.data.data
@@ -271,8 +297,22 @@ export default {
     agregarCategoria() {
       this.dialog = true
     },
+    async registrarCategoriaComercio() {
+      if (this.$refs.form.validate()) {
+        const c = await axios.post(env.endpoint + '/tipoProductoComercio.php', {
+          idComercio: this.idC,
+          idTipoProducto: this.categoria,
+        })
+
+        this.alertRegistrar(c.data.data, c.data.message)
+
+        this.vaciarCat()
+        this.cerrarDialog()
+        this.actualizarCats()
+      }
+    },
     async cambiarEstadoCat(ide, es) {
-      const x = es === false ? '1' : '0'
+      const x = es === false ? '2' : '1'
 
       const js = {
         id: ide,
@@ -284,8 +324,11 @@ export default {
         js
       )
 
-      this.error = true
-      this.error_msg = e.data.message
+      this.alertRegistrar(e.data.data, e.data.message)
+      this.actualizarCats()
+
+      /* this.error = true
+      this.error_msg = e.data.message */
 
       // Categorías del comercio
       /*  const cc = await axios.get(
@@ -297,10 +340,21 @@ export default {
       this.formatearEstadoCategoria() */
     },
     formatearEstadoCategoria() {
-      this.categoriasC.forEach((element) => {
-        const e = !element.estado
-        element.estado = e
+      this.categoriasC.map((a) => {
+        const es = a.estado !== 2
+        a.estado = es
+        return a
       })
+    },
+    editarCat(id) {
+      this.dialog = true
+      this.editando = true
+      const ca = this.categoriasC.filter(
+        (a) => a.idTipoProductoComercio === id
+      )[0]
+      this.idtpc = ca.idTipoProductoComercio
+      this.categoria = ca.idTipoProducto
+      this.auxEstado = ca.estado
     },
     mostrarFormCategoria(id) {
       this.mostrarNuevaCat =
@@ -308,37 +362,117 @@ export default {
     },
     cerrarDialog() {
       this.dialog = false
+
       this.mostrarNuevaCat = false
     },
-    async registrarCategoriaComercio(id) {
-      const c = await axios.post(env.endpoint + '/tipoProductoComercio.php', {
-        idComercio: this.idC,
-        idTipoProducto: id,
-      })
+    vaciarCat() {
+      this.idtpc = null
+      this.categoria = null
+      this.auxEstado = null
+    },
+    async guardarEditado(id) {
+      if (this.$refs.form.validate()) {
+        const c = await axios.put(env.endpoint + '/tipoProductoComercio.php', {
+          id: this.idtpc,
+          idComercio: this.idC,
+          idTipoProducto: this.categoria,
+          observaciones: 'Sin Observaciones',
+          estado: this.auxEstado,
+        })
 
-      this.error = true
-      this.error_msg = c.data.message
+        this.alertRegistrar(c.data.data, c.data.message)
 
-      const a = await axios.get(
-        env.endpoint + '/tipoProductoComercio.php?id=' + this.idC
-      )
-      this.categoriasC = null
-      this.categoriasC = a.data.data.filter((a) => a.estado === 0)
+        this.vaciarCat()
+        this.cerrarDialog()
+        this.actualizarCats()
 
-      this.cerrarDialog()
+        /*  this.error = true
+        this.error_msg = c.data.message
+
+        const a = await axios.get(
+          env.endpoint + '/tipoProductoComercio.php?id=' + this.idC
+        )
+        this.categoriasC = null
+        this.categoriasC = a.data.data.filter((a) => a.estado === 0)
+
+        this.cerrarDialog() */
+      }
     },
     async registrarCategoria() {
-      const c = await axios.post(env.endpoint + '/tipoProducto.php', {
-        nombreTipoProducto: this.nombreCat,
-        icono: this.iconoCat,
-      })
+      if (this.$refs.form.validate()) {
+        const c = await axios.post(env.endpoint + '/tipoProducto.php', {
+          nombreTipoProducto: this.nombreCat,
+          icono: this.iconoCat,
+        })
 
+        this.alertRegistrar(c.data.data, c.data.message)
+
+        this.vaciarCat()
+        this.cerrarDialog()
+        this.actualizarCats()
+      }
+
+      /*
       this.error = true
       this.error_msg = c.data.message
 
       const a = await axios.get(env.endpoint + '/tipoProducto.php')
       this.categorias = a.data.data
+      this.cerrarDialog() */
+    },
+    eliminarCat() {
+      this.alertEliminar(this.idtpc)
       this.cerrarDialog()
+      this.actualizarCats()
+    },
+    async actualizarCats() {
+      const id = this.$route.params.id
+      let data = (
+        await axios.get(env.endpoint + '/tipoProductoComercio.php?id=' + id)
+      ).data.data
+
+      if (data === false) {
+        this.categoriasC = []
+      } else {
+        data = data.map((a) => {
+          const es = a.estado !== 2
+          a.estado = es
+          return a
+        })
+
+        this.categoriasC = data.filter((a) => a.estado !== 3)
+      }
+    },
+    alertRegistrar(respuesta, mensaje) {
+      const ico = respuesta === true ? 'success' : 'error'
+      this.$swal({ icon: ico, title: mensaje, confirmButtonColor: '#f45c04' })
+    },
+    alertEliminar(ide) {
+      this.$swal({
+        title: '¿Desea Eliminar la Categoría?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#F25C05',
+        cancelButtonColor: '#383838',
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          /* this.$swal('Deleted!', 'Your file has been deleted.', 'success') */
+          const js = {
+            id: ide,
+            campo: 'estado',
+            dato: 3,
+          }
+          const e = await axios.patch(
+            env.endpoint + '/tipoProductoComercio.php',
+            js
+          )
+
+          this.alertRegistrar(e.data.data, e.data.message)
+          this.actualizarCats()
+        }
+      })
     },
   },
 }

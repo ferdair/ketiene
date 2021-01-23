@@ -78,6 +78,11 @@
                 <v-list-item-title>Items</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item to="/admin">
+              <v-list-item-content>
+                <v-list-item-title>Volver al Inicio Admin</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list-group>
         </v-list>
       </v-navigation-drawer>
@@ -131,7 +136,7 @@ export default {
 
   data: () => ({
     param: null,
-    drawer: false,
+    drawer: true,
     user: {
       initials: '',
       fullName: '',

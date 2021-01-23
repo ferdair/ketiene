@@ -50,10 +50,7 @@
               ><h3 class="pl-4">{{ promo.tituloPromocion }}</h3>
               <v-subheader>{{ promo.subtituloPromocion }}</v-subheader> </span
             ><v-spacer></v-spacer>
-            <span class="white--text text-h6 orange darken-4">
-              <h3>&nbsp;&nbsp;&nbsp;{{ promo.etiquetaPromocion }}</h3></span
-            >
-            <v-spacer></v-spacer>
+
             <v-btn icon @click="editarPromo(promo.idPromocion)"
               ><v-icon>mdi-pencil</v-icon></v-btn
             >
@@ -73,21 +70,120 @@
           <v-card-title class="headline"> Nueva Promoción</v-card-title>
           <v-card-text>
             <v-form ref="form" v-model="valid" lazy-validation>
-              <v-text-field
-                v-model="tituloPromo"
-                :rules="tituloPromoRules"
-                label="Título"
-                required
-                outlined
-              ></v-text-field>
-
-              <v-text-field
-                v-model="subtituloPromo"
-                :rules="subtituloPromoRules"
-                label="Subtítulo"
-                required
-                outlined
-              ></v-text-field>
+              <v-row>
+                <v-col cols="7">
+                  <v-row>
+                    <v-col cols="12">
+                      <v-text-field
+                        v-model="tituloPromo"
+                        :rules="tituloPromoRules"
+                        label="Título"
+                        required
+                        outlined
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-text-field
+                        v-model="subtituloPromo"
+                        :rules="subtituloPromoRules"
+                        label="Subtítulo"
+                        required
+                        outlined
+                      ></v-text-field
+                    ></v-col>
+                    <v-col cols="12">
+                      <v-text-field
+                        prefix="$"
+                        v-model="precioPromo"
+                        :rules="precioPromoRules"
+                        label="Precio (Ejem. $2.99/Desde $2.99)"
+                        required
+                        outlined
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12"
+                      ><v-text-field
+                        prefix="$"
+                        v-model="precioAnterior"
+                        :rules="precioAnteriorRules"
+                        label="Precio Normal/Anterior (0 para no mostrar)"
+                        required
+                        outlined
+                      ></v-text-field
+                    ></v-col>
+                    <v-col cols="12">
+                      <v-textarea
+                        outlined
+                        label="Descripción"
+                        auto-grow
+                        v-model="descripcionPromo"
+                      ></v-textarea>
+                    </v-col>
+                  </v-row>
+                </v-col>
+                <v-col cols="5">
+                  <v-file-input
+                    accept="image/*"
+                    label="Logo"
+                    v-model="imagenPromo"
+                    @change="urlImagen"
+                    :clearable="false"
+                    outlined
+                    :rules="imagenPromoRules"
+                  ></v-file-input>
+                  <div class="d-flex justify-center">
+                    <v-icon v-if="imagenPromo === null">mdi-camera-plus</v-icon>
+                    <v-img
+                      v-else
+                      :src="imagenUrl"
+                      max-height="150"
+                      max-width="250"
+                      contain
+                    >
+                    </v-img>
+                  </div>
+                </v-col>
+              </v-row>
+              <v-row v-for="(horario, i) in horarios" :key="i">
+                <v-col cols="12" md="4">
+                  <v-checkbox
+                    v-model="horario.valor"
+                    :label="horario.dia"
+                    color="#f45c04"
+                  ></v-checkbox>
+                </v-col>
+                <v-col cols="12" md="8" v-if="horario.valor">
+                  <!--  <v-range-slider
+                  hint="Hora de atención"
+                  max="24"
+                  min="0"
+                  thumb-label="always"
+                  thumb-color="#f45c04"
+                  v-model="horario.hora"
+                  track-color="orange"
+                  color="#f45c04"
+                  step="0.1"
+                ></v-range-slider> -->
+                  <v-row>
+                    <v-col cols="12" md="4">
+                      <v-text-field
+                        type="time"
+                        v-model="horario.hora[0]"
+                        color="#f45c04"
+                        :rules="horarioRules"
+                      ></v-text-field
+                    ></v-col>
+                    <v-col cols="12" md="4">
+                      <v-text-field
+                        type="time"
+                        v-model="horario.hora[1]"
+                        color="#f45c04"
+                        :rules="horarioRules"
+                      ></v-text-field
+                    ></v-col>
+                  </v-row>
+                </v-col>
+              </v-row>
 
               <!-- <v-text-field
                 v-model="etiquetaPromo"
@@ -97,22 +193,15 @@
                 outlined
                 hint="Ejemplo: Gratis"
               ></v-text-field> -->
-              <v-text-field
-                prefix="$"
-                v-model="precioPromo"
-                :rules="precioPromoRules"
-                label="Precio"
-                required
-                outlined
-              ></v-text-field>
-              <v-text-field
+
+              <!--   <v-text-field
                 v-model="etiquetaPromo"
                 :rules="etiquetaPromoRules"
                 label="Etiqueta"
                 required
                 outlined
                 prepend-inner-icon="mdi-tag"
-              ></v-text-field>
+              ></v-text-field> -->
               <!--  <v-autocomplete
                 v-model="etiquetaItem"
                 :rules="etiquetaItemRules"
@@ -124,27 +213,8 @@
                 item-value="idEtiquetaProducto"
               >
               </v-autocomplete> -->
-              <v-file-input
-                accept="image/*"
-                label="Logo"
-                v-model="imagenPromo"
-                @change="urlImagen"
-                :clearable="false"
-                outlined
-                :rules="imagenPromoRules"
-              ></v-file-input>
-              <div class="d-flex justify-center">
-                <v-icon v-if="imagenPromo === null">mdi-camera-plus</v-icon>
-                <v-img
-                  v-else
-                  :src="imagenUrl"
-                  max-height="150"
-                  max-width="250"
-                  contain
-                >
-                </v-img>
-              </div>
-              <div class="d-flex flex-wrap">
+
+              <!-- <div class="d-flex flex-wrap">
                 <v-checkbox
                   v-model="lunesPromo"
                   label="Lunes"
@@ -187,13 +257,7 @@
                   color="#f45c04"
                 ></v-checkbox
                 >&nbsp;
-              </div>
-              <v-textarea
-                outlined
-                label="Descripción"
-                auto-grow
-                v-model="descripcionPromo"
-              ></v-textarea>
+              </div> -->
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -207,19 +271,18 @@
               <v-icon left>mdi-delete</v-icon>
               Eliminar
             </v-btn>
-            <v-btn color="green darken-1" text @click="cancelar()">
-              Cancelar
-            </v-btn>
+            <v-btn text @click="cancelar()"> Cancelar </v-btn>
             <v-btn
               color="#f45c04"
+              dark
               @click="subirImagen()"
               v-if="editando === false"
             >
               Guardar
             </v-btn>
             <v-btn
-              color="green darken-1"
-              text
+              color="#f45c04"
+              dark
               @click="guardarEditado()"
               v-if="editando === true"
             >
@@ -256,19 +319,24 @@ export default {
     subtituloPromoRules: [(v) => !!v || 'Subtítulo es requerido'],
     precioPromo: null,
     precioPromoRules: [(v) => !!v || 'Precio es requerido'],
+    precioAnterior: null,
+    precioAnteriorRules: [(v) => !!v || 'Precio anterior es requerido'],
     etiquetaPromo: null,
     etiquetaPromoRules: [(v) => !!v || 'Etiqueta es requerido'],
     imagenPromo: null,
     imagenPromoRules: [(v) => !!v || 'Imágen es requerido'],
     imagenUrl: '',
     descripcionPromo: '',
-    lunesPromo: false,
-    martesPromo: false,
-    miercolesPromo: false,
-    juevesPromo: false,
-    viernesPromo: false,
-    sabadoPromo: false,
-    domingoPromo: false,
+    horarios: [
+      { dia: 'Lunes', valor: false, hora: ['08:00', '20:00'] },
+      { dia: 'Martes', valor: false, hora: ['08:00', '20:00'] },
+      { dia: 'Miércoles', valor: false, hora: ['08:00', '20:00'] },
+      { dia: 'Jueves', valor: false, hora: ['08:00', '20:00'] },
+      { dia: 'Viernes', valor: false, hora: ['08:00', '20:00'] },
+      { dia: 'Sábado', valor: false, hora: ['08:00', '20:00'] },
+      { dia: 'Domingo', valor: false, hora: ['08:00', '20:00'] },
+    ],
+    horarioRules: [(v) => !!v || 'El horatio es requerido'],
     error: false,
     error_msg: '',
     dialog: false,
@@ -279,24 +347,83 @@ export default {
     auxEstado: false,
     idPr: null,
   }),
-  async mounted() {
+  mounted() {
     this.idC = this.$route.params.id
 
-    const c = await axios.get(
+    /*  const c = await axios.get(
       env.endpoint + '/promociones.php?restaurante=' + this.idC
     )
-    this.promociones = c.data.data.filter((a) => a.estado !== 2)
+    this.promociones = c.data.data.filter((a) => a.estado !== 2) */
+    this.actualizarPromo()
   },
   methods: {
+    async actualizarPromo() {
+      const id = this.$route.params.id
+      let data = (
+        await axios.get(env.endpoint + '/promociones.php?restaurante=' + id)
+      ).data.data
+
+      if (data === false) {
+        this.promociones = []
+      } else {
+        data = data.filter((a) => a.estado !== 3)
+        data = data.map((a) => {
+          const es = a.estado !== 2
+          a.estado = es
+          return a
+        })
+
+        this.promociones = data
+      }
+    },
     async cambiarEstadoPromo(ide, es) {
-      const e = await axios.patch(env.endpoint + '/promociones.php', {
+      /* const e = await axios.patch(env.endpoint + '/promociones.php', {
         id: ide,
         campo: 'estado',
         dato: es,
       })
 
       this.error = true
-      this.error_msg = e.data.message
+      this.error_msg = e.data.message */
+      const x = es === false ? '2' : '1'
+      const e = await axios.patch(env.endpoint + '/promociones.php', {
+        id: ide,
+        campo: 'estado',
+        dato: Number(x),
+      })
+      this.alertCambio(e.data.data, e.data.message)
+      this.actualizarPromo()
+    },
+    alertEliminar(ide) {
+      this.$swal({
+        title: '¿Desea Eliminar la Fecha Especial?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#F25C05',
+        cancelButtonColor: '#383838',
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          /* this.$swal('Deleted!', 'Your file has been deleted.', 'success') */
+          const js = {
+            id: ide,
+            campo: 'estado',
+            dato: 3,
+          }
+          const e = await axios.patch(
+            env.endpoint + '/fechasEspeciales.php',
+            js
+          )
+
+          this.alertCambio(e.data.data, e.data.message)
+          this.actualizarPromo()
+        }
+      })
+    },
+    alertCambio(respuesta, mensaje) {
+      const ico = respuesta === true ? 'success' : 'error'
+      this.$swal({ icon: ico, title: mensaje })
     },
     urlImagen() {
       if (this.imagenPromo) {
@@ -352,7 +479,7 @@ export default {
                 /* eslint-enable */
                 //            this.picture = downloadURL
 
-                let d = ''
+                /* let d = ''
 
                 if (!!this.lunesPromo === true) {
                   d += '1'
@@ -393,7 +520,21 @@ export default {
                   d += '1'
                 } else {
                   d += '0'
-                }
+                } */
+
+                let d = ''
+                const h = []
+
+                this.horarios.forEach((element) => {
+                  if (element.valor === true) {
+                    d += '1'
+                    const ho = element.hora[0] + '-' + element.hora[1]
+                    h.push(ho)
+                  } else {
+                    d += '0'
+                    h.push('00:00-00:00')
+                  }
+                })
 
                 const js = {
                   tituloPromocion: this.tituloPromo,
@@ -402,8 +543,15 @@ export default {
                   idComercio: this.idC,
                   precio: this.precioPromo,
                   imagen: downloadURL,
-                  etiquetaPromocion: this.etiquetaPromo,
+                  precioAnterior: this.precioAnterior,
                   dias: d,
+                  lunes: h[0],
+                  martes: h[1],
+                  miercoles: h[2],
+                  jueves: h[3],
+                  viernes: h[4],
+                  sabado: h[5],
+                  domingo: h[6],
                 }
 
                 const r = await axios.post(
@@ -411,7 +559,13 @@ export default {
                   js
                 )
 
-                this.error = true
+                this.alertCambio(r.data.data, r.data.message)
+
+                this.vaciarPromo()
+                this.cancelar()
+                this.actualizarPromo()
+
+                /* this.error = true
                 this.error_msg = r.data.message
 
                 this.cancelar()
@@ -420,7 +574,7 @@ export default {
                 const p = await axios.get(
                   env.endpoint + '/promociones.php?restaurante=' + this.idC
                 )
-                this.promociones = p.data.data.filter((a) => a.estado !== 2)
+                this.promociones = p.data.data.filter((a) => a.estado !== 2) */
               })
           }
         )
@@ -447,13 +601,18 @@ export default {
       this.imagenUrl = pr.imagen
       this.auxImg = pr.imagen
       this.descripcionPromo = pr.descripcion
-      this.lunesPromo = !!pr.dias[0].valido /*  === 1 ? true : false */
-      this.martesPromo = !!pr.dias[1].valido /* === 1 ? true : false */
-      this.miercolesPromo = !!pr.dias[2].valido /* === 1 ? true : false */
-      this.juevesPromo = !!pr.dias[3].valido /* === 1 ? true : false */
-      this.viernesPromo = !!pr.dias[4].valido /* === 1 ? true : false */
-      this.sabadoPromo = !!pr.dias[5].valido /* === 1 ? true : false */
-      this.domingoPromo = !!pr.dias[6].valido /* === 1 ? true : false */
+      this.precioAnterior = pr.precioAnterior
+      /*  this.lunesPromo = !!pr.dias[0].valido
+      this.martesPromo = !!pr.dias[1].valido
+      this.miercolesPromo = !!pr.dias[2].valido
+      this.juevesPromo = !!pr.dias[3].valido
+      this.viernesPromo = !!pr.dias[4].valido
+      this.sabadoPromo = !!pr.dias[5].valido
+      this.domingoPromo = !!pr.dias[6].valido */
+      this.horarios = pr.dias.forEach((element, i) => {
+        this.horarios[i].valor = element.abre
+        this.horarios[i].hora = element.horario
+      })
     },
     vaciarPromo() {
       this.idPr = null
@@ -473,21 +632,31 @@ export default {
       this.imagenUrl = ''
       this.auxImg = null
       this.descripcionPromo = null
-      this.lunesPromo = false
+      this.precioAnterior = null
+      this.horarios = [
+        { dia: 'Lunes', valor: false, hora: ['08:00', '20:00'] },
+        { dia: 'Martes', valor: false, hora: ['08:00', '20:00'] },
+        { dia: 'Miércoles', valor: false, hora: ['08:00', '20:00'] },
+        { dia: 'Jueves', valor: false, hora: ['08:00', '20:00'] },
+        { dia: 'Viernes', valor: false, hora: ['08:00', '20:00'] },
+        { dia: 'Sábado', valor: false, hora: ['08:00', '20:00'] },
+        { dia: 'Domingo', valor: false, hora: ['08:00', '20:00'] },
+      ]
+      /*  this.lunesPromo = false
       this.martesPromo = false
       this.miercolesPromo = false
       this.juevesPromo = false
       this.viernesPromo = false
       this.sabadoPromo = false
-      this.domingoPromo = false
+      this.domingoPromo = false */
     },
     cancelar() {
       this.dialog = false
       this.editando = false
       this.vaciarPromo()
     },
-    async eliminarPromo() {
-      const p = await axios.patch(env.endpoint + '/promociones.php', {
+    eliminarPromo() {
+      /* const p = await axios.patch(env.endpoint + '/promociones.php', {
         id: this.idPr,
         campo: 'estado',
         dato: 2,
@@ -495,8 +664,12 @@ export default {
 
       this.error = true
       this.error_msg = p.data.message
+      this.cancelar() */
+      this.alertEliminar(this.idPr)
       this.cancelar()
+      this.actualizarPromo()
     },
+
     async guardarEditado() {
       if (this.$refs.form.validate()) {
         if (this.imagenPromo.name !== 'filename') {
@@ -544,8 +717,20 @@ export default {
                   /* eslint-enable */
                   //            this.picture = downloadURL
                   let d = ''
+                  const h = []
 
-                  if (!!this.lunesPromo === true) {
+                  this.horarios.forEach((element) => {
+                    if (element.valor === true) {
+                      d += '1'
+                      const ho = element.hora[0] + '-' + element.hora[1]
+                      h.push(ho)
+                    } else {
+                      d += '0'
+                      h.push('00:00-00:00')
+                    }
+                  })
+
+                  /* f (!!this.lunesPromo === true) {
                     d += '1'
                   } else {
                     d += '0'
@@ -584,11 +769,11 @@ export default {
                     d += '1'
                   } else {
                     d += '0'
-                  }
+                  } */
 
                   alert(d)
-                  const e = this.auxEstado === true ? 1 : 0
-
+                  /*                   const e = this.auxEstado === true ? 1 : 0
+                   */
                   const pe = {
                     idPromocion: this.idPr,
                     tituloPromocion: this.tituloPromo,
@@ -597,10 +782,17 @@ export default {
                     idComercio: this.idC,
                     precio: this.precioPromo,
                     imagen: downloadURL,
-                    etiquetaPromocion: this.etiquetaPromo,
+                    precioAnterior: this.precioAnterior,
                     dias: d,
-                    estado: e,
+                    estado: this.auxEstado,
                     observaciones: 'S/O',
+                    lunes: h[0],
+                    martes: h[1],
+                    miercoles: h[2],
+                    jueves: h[3],
+                    viernes: h[4],
+                    sabado: h[5],
+                    domingo: h[6],
                   }
 
                   const r = await axios.put(
@@ -608,7 +800,13 @@ export default {
                     pe
                   )
 
-                  this.error = true
+                  this.alertCambio(r.data.data, r.data.message)
+
+                  this.vaciarPromo()
+                  this.cancelar()
+                  this.actualizarPromo()
+
+                  /*  this.error = true
                   this.error_msg = r.data.message
 
                   this.cancelar()
@@ -617,14 +815,26 @@ export default {
                   const p = await axios.get(
                     env.endpoint + '/promociones.php?restaurante=' + this.idC
                   )
-                  this.promociones = p.data.data.filter((a) => a.estado !== 2)
+                  this.promociones = p.data.data.filter((a) => a.estado !== 2) */
                 })
             }
           )
         } else {
           let d = ''
+          const h = []
 
-          if (!!this.lunesPromo === true) {
+          this.horarios.forEach((element) => {
+            if (element.valor === true) {
+              d += '1'
+              const ho = element.hora[0] + '-' + element.hora[1]
+              h.push(ho)
+            } else {
+              d += '0'
+              h.push('00:00-00:00')
+            }
+          })
+
+          /* if (!!this.lunesPromo === true) {
             d += '1'
           } else {
             d += '0'
@@ -663,7 +873,7 @@ export default {
             d += '1'
           } else {
             d += '0'
-          }
+          } */
 
           const pe = {
             idPromocion: this.idPr,
@@ -673,15 +883,28 @@ export default {
             idComercio: this.idC,
             precio: this.precioPromo,
             imagen: this.auxImg,
-            etiquetaPromocion: this.etiquetaPromo,
+            precioAnterior: this.precioAnterior,
             dias: d,
             estado: this.auxEstado,
             observaciones: 'S/O',
+            lunes: h[0],
+            martes: h[1],
+            miercoles: h[2],
+            jueves: h[3],
+            viernes: h[4],
+            sabado: h[5],
+            domingo: h[6],
           }
 
           const r = await axios.put(env.endpoint + '/promociones.php', pe)
 
-          this.error = true
+          this.alertCambio(r.data.data, r.data.message)
+
+          this.vaciarPromo()
+          this.cancelar()
+          this.actualizarPromo()
+
+          /*  this.error = true
           this.error_msg = r.data.message
 
           this.cancelar()
@@ -690,7 +913,7 @@ export default {
           const p = await axios.get(
             env.endpoint + '/promociones.php?restaurante=' + this.idC
           )
-          this.promociones = p.data.data.filter((a) => a.estado !== 2)
+          this.promociones = p.data.data.filter((a) => a.estado !== 2) */
         }
       }
     },

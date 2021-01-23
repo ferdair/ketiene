@@ -47,15 +47,19 @@
             <h3>{{ promo.tituloCumple }}</h3>
             &nbsp;
             <span class="light-green accent-4 white--text text-h6"
-              >&nbsp;{{ promo.etiquetaCumple }}</span
+              >&nbsp;{{ promo.etiquetaCumple }}&nbsp;</span
             >
             <v-spacer></v-spacer>
+            <v-btn icon @click="alertEliminar(promo.idCumple)"
+              ><v-icon>mdi-delete</v-icon></v-btn
+            >
             <v-btn icon @click="editarPromo(promo.idCumple)"
               ><v-icon>mdi-pencil</v-icon></v-btn
             >
             <v-switch
               v-model="promo.estado"
               color="#f45c04"
+              dark
               @change="cambiarEstadoPromo(promo.idCumple, promo.estado)"
             >
             </v-switch>
@@ -71,6 +75,65 @@
           >
           <v-card-text>
             <v-form ref="form" v-model="valid" lazy-validation>
+              <v-row>
+                <v-col cols="8">
+                  <v-row>
+                    <v-col cols="12">
+                      <v-text-field
+                        v-model="tituloPromo"
+                        :rules="tituloPromoRules"
+                        label="Título"
+                        required
+                        outlined
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12"
+                      ><v-text-field
+                        v-model="etiquetaPromo"
+                        :rules="etiquetaPromoRules"
+                        label="Etiqueta"
+                        required
+                        outlined
+                        hint="Ejemplo: Gratis"
+                      ></v-text-field
+                    ></v-col>
+                    <v-col cols="12">
+                      <v-textarea
+                        outlined
+                        label="Descripción"
+                        auto-grow
+                        v-model="descripcionPromo"
+                      ></v-textarea>
+                    </v-col>
+                  </v-row>
+                </v-col>
+                <v-col cols="4">
+                  <v-file-input
+                    accept="image/*"
+                    label="Logo"
+                    v-model="imagenPromo"
+                    @change="urlImagen"
+                    :clearable="false"
+                    outlined
+                    :rules="imagenPromoRules"
+                  ></v-file-input>
+                  <div class="d-flex justify-center">
+                    <v-icon v-if="imagenPromo === null">mdi-camera-plus</v-icon>
+                    <v-img
+                      v-else
+                      :src="imagenUrl"
+                      max-height="150"
+                      max-width="250"
+                      contain
+                    >
+                    </v-img>
+                  </div>
+                  <div>
+                    *Se Recomienda que las imagen es tengan una relación de
+                    aspecto de 1.2817 Ejemplo 1281.7 x 1000 414 x 323
+                  </div>
+                </v-col>
+              </v-row>
               <!--  <v-autocomplete
                 v-model="categoriaNueva"
                 :rules="categoriaNuevaRules"
@@ -82,21 +145,7 @@
                 item-value="idTipoProducto"
               >
               </v-autocomplete> -->
-              <v-text-field
-                v-model="tituloPromo"
-                :rules="tituloPromoRules"
-                label="Título"
-                required
-                outlined
-              ></v-text-field>
-              <v-text-field
-                v-model="etiquetaPromo"
-                :rules="etiquetaPromoRules"
-                label="Etiqueta"
-                required
-                outlined
-                hint="Ejemplo: Gratis"
-              ></v-text-field>
+
               <!-- <v-text-field
                 prefix="$"
                 v-model="precioItem"
@@ -106,26 +155,7 @@
                 outlined
                 type="number"
               ></v-text-field> -->
-              <v-file-input
-                accept="image/*"
-                label="Logo"
-                v-model="imagenPromo"
-                @change="urlImagen"
-                :clearable="false"
-                outlined
-                :rules="imagenPromoRules"
-              ></v-file-input>
-              <div class="d-flex justify-center">
-                <v-icon v-if="imagenPromo === null">mdi-camera-plus</v-icon>
-                <v-img
-                  v-else
-                  :src="imagenUrl"
-                  max-height="150"
-                  max-width="250"
-                  contain
-                >
-                </v-img>
-              </div>
+
               <!-- <v-autocomplete
                 v-model="etiquetaItem"
                 :rules="etiquetaItemRules"
@@ -137,12 +167,6 @@
                 item-value="idEtiquetaProducto"
               >
               </v-autocomplete> -->
-              <v-textarea
-                outlined
-                label="Descripción"
-                auto-grow
-                v-model="descripcionPromo"
-              ></v-textarea>
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -156,21 +180,20 @@
               <v-icon left>mdi-delete</v-icon>
               Eliminar
             </v-btn>
-            <v-btn color="green darken-1" text @click="cancelar()">
-              Cancelar
-            </v-btn>
+            <v-btn text @click="cancelar()"> Cancelar </v-btn>
             <v-btn
               color="#f45c04"
               @click="subirImagen()"
+              dark
               v-if="editando === false"
             >
               Guardar
             </v-btn>
             <v-btn
-              color="green darken-1"
-              text
+              color="#f45c04"
               @click="guardarEditado()"
               v-if="editando === true"
+              dark
             >
               Guardar
             </v-btn>
@@ -217,22 +240,55 @@ export default {
     idPr: null,
     imagenUrl: '',
   }),
-  async mounted() {
+  mounted() {
     this.idC = this.$route.params.id
-
+    /*
     const c = await axios.get(env.endpoint + '/promoCumple.php?id=' + this.idC)
-    this.promosCumpleanos = c.data.data.filter((a) => a.estado !== 2)
+
+    if (c.data.data === false) {
+      this.promosCumpleanos = []
+    } else {
+      this.promosCumpleanos = c.data.data.filter((a) => a.estado !== 3)
+      this.
+    } */
+    this.actualizarPromo()
   },
   methods: {
     async cambiarEstadoPromo(ide, es) {
+      const x = es === false ? '2' : '1'
       const e = await axios.patch(env.endpoint + '/promoCumple.php', {
         id: ide,
         campo: 'estado',
-        dato: es,
+        dato: Number(x),
       })
+      this.alertCambio(e.data.data, e.data.message)
+      this.actualizarPromo()
+      /*  this.error = true
+      this.error_msg = e.data.message */
+    },
+    alertEliminar(ide) {
+      this.$swal({
+        title: '¿Desea Eliminar la Promo?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#F25C05',
+        cancelButtonColor: '#383838',
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          /* this.$swal('Deleted!', 'Your file has been deleted.', 'success') */
+          const js = {
+            id: ide,
+            campo: 'estado',
+            dato: 3,
+          }
+          const e = await axios.patch(env.endpoint + '/promoCumple.php', js)
 
-      this.error = true
-      this.error_msg = e.data.message
+          this.alertCambio(e.data.data, e.data.message)
+          this.actualizarPromo()
+        }
+      })
     },
     urlImagen() {
       if (this.imagenPromo) {
@@ -292,7 +348,7 @@ export default {
                   idComercio: this.idC,
                   etiquetaCumple: this.etiquetaPromo,
                   descripcion: this.descripcionPromo,
-                  imagen: this.downloadURL,
+                  imagen: downloadURL,
                   tituloCumple: this.tituloPromo,
                 }
 
@@ -301,8 +357,16 @@ export default {
                   js
                 )
 
-                this.error = true
-                this.error_msg = r.data.message
+                this.alertCambio(r.data.data, r.data.message)
+
+                this.vaciarPromo()
+                this.cancelar()
+                this.actualizarPromo()
+
+                /*  this.error = true
+                this.error_msg = r.data.message */
+
+                /* 
 
                 this.cancelar()
 
@@ -312,11 +376,33 @@ export default {
                 )
                 this.promosCumpleanos = p.data.data.filter(
                   (a) => a.estado !== 2
-                )
+                ) */
               })
           }
         )
       }
+    },
+    async actualizarPromo() {
+      const id = this.$route.params.id
+      let data = (await axios.get(env.endpoint + '/promoCumple.php?id=' + id))
+        .data.data
+
+      if (data === false) {
+        this.promosCumpleanos = []
+      } else {
+        data = data.filter((a) => a.estado !== 3)
+        data = data.map((a) => {
+          const es = a.estado !== 2
+          a.estado = es
+          return a
+        })
+
+        this.promosCumpleanos = data
+      }
+    },
+    alertCambio(respuesta, mensaje) {
+      const ico = respuesta === true ? 'success' : 'error'
+      this.$swal({ icon: ico, title: mensaje })
     },
     editarPromo(id) {
       this.dialog = true
@@ -347,8 +433,8 @@ export default {
       this.editando = false
       this.vaciarPromo()
     },
-    async eliminarPromo() {
-      const p = await axios.patch(env.endpoint + '/promoCumple.php', {
+    eliminarPromo() {
+      /*  const p = await axios.patch(env.endpoint + '/promoCumple.php', {
         id: this.idPr,
         campo: 'estado',
         dato: 2,
@@ -356,7 +442,10 @@ export default {
 
       this.error = true
       this.error_msg = p.data.message
+      this.cancelar() */
+      this.alertEliminar(this.idPr)
       this.cancelar()
+      this.actualizarPromo()
     },
     async guardarEditado() {
       if (this.$refs.form.validate()) {
@@ -405,16 +494,14 @@ export default {
                   /* eslint-enable */
                   //            this.picture = downloadURL
 
-                  const e = this.auxEstado === true ? 1 : 0
-
                   const pe = {
                     idCumple: this.idPr,
-                    idComercio: this.idC,
+                    idComercio: Number(this.idC),
                     etiquetaCumple: this.etiquetaPromo,
                     descripcion: this.descripcionPromo,
                     imagen: downloadURL,
                     tituloCumple: this.tituloPromo,
-                    estado: e,
+                    estado: this.auxEstado,
                   }
 
                   const r = await axios.put(
@@ -422,7 +509,12 @@ export default {
                     pe
                   )
 
-                  this.error = true
+                  this.alertCambio(r.data.data, r.data.message)
+
+                  this.vaciarPromo()
+                  this.cancelar()
+                  this.actualizarPromo()
+                  /*  this.error = true
                   this.error_msg = r.data.message
 
                   this.cancelar()
@@ -433,7 +525,7 @@ export default {
                   )
                   this.promosCumpleanos = p.data.data.filter(
                     (a) => a.estado !== 2
-                  )
+                  ) */
                 })
             }
           )
@@ -450,7 +542,13 @@ export default {
 
           const r = await axios.put(env.endpoint + '/promoCumple.php', pe)
 
-          this.error = true
+          this.alertCambio(r.data.data, r.data.message)
+
+          this.vaciarPromo()
+          this.cancelar()
+          this.actualizarPromo()
+
+          /* this.error = true
           this.error_msg = r.data.message
 
           this.cancelar()
@@ -459,7 +557,7 @@ export default {
           const p = await axios.get(
             env.endpoint + '/promoCumple.php?id=' + this.idC
           )
-          this.promosCumpleanos = p.data.data.filter((a) => a.estado !== 2)
+          this.promosCumpleanos = p.data.data.filter((a) => a.estado !== 2) */
         }
       }
     },

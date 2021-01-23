@@ -26,7 +26,7 @@
           item-text="nombreTipoProducto"
           item-value="idTipoProductoComercio"
           dark
-          @change="cambiarProductos"
+          @change="cambiarProductos()"
         >
         </v-autocomplete>
       </v-col>
@@ -48,6 +48,9 @@
               >&nbsp; {{ prodC.nombreEtiqueta }}</span
             >
             <v-spacer></v-spacer>
+            <v-btn icon @click="alertEliminar(prodC.idProducto)"
+              ><v-icon>mdi-delete</v-icon></v-btn
+            >
             <v-btn icon @click="editarProducto(prodC.idProducto)"
               ><v-icon>mdi-pencil</v-icon></v-btn
             >
@@ -67,71 +70,112 @@
           <v-card-title class="headline"> Nuevo Ítem </v-card-title>
           <v-card-text>
             <v-form ref="form" v-model="valid" lazy-validation>
-              <v-autocomplete
-                v-model="categoriaNueva"
-                :rules="categoriaNuevaRules"
-                label="Categoría"
-                required
-                outlined
-                :items="categoriasC"
-                item-text="nombreTipoProducto"
-                item-value="idTipoProducto"
-              >
-              </v-autocomplete>
-              <v-text-field
-                v-model="nombreItem"
-                :rules="nombreItemRules"
-                label="Nombre del Item"
-                required
-                outlined
-              ></v-text-field>
-              <v-text-field
-                prefix="$"
-                v-model="precioItem"
-                :rules="precioItemRules"
-                label="Precio del Item"
-                required
-                outlined
-                type="number"
-              ></v-text-field>
-              <v-file-input
-                accept="image/*"
-                label="Logo"
-                v-model="imagenItem"
-                @change="urlImagen"
-                :clearable="false"
-                outlined
-                :rules="imagenItemRules"
-              ></v-file-input>
-              <div class="d-flex justify-center">
-                <v-icon v-if="imagenItem === null">mdi-camera-plus</v-icon>
-                <v-img
-                  v-else
-                  :src="imagenUrl"
-                  max-height="150"
-                  max-width="250"
-                  contain
-                >
-                </v-img>
-              </div>
-              <v-autocomplete
-                v-model="etiquetaItem"
-                :rules="etiquetaItemRules"
-                label="Etiqueta"
-                required
-                outlined
-                :items="etiquetas"
-                item-text="nombreEtiqueta"
-                item-value="idEtiquetaProducto"
-              >
-              </v-autocomplete>
-              <v-textarea
-                outlined
-                label="Descripción"
-                auto-grow
-                v-model="descripcionItem"
-                :rules="descripcionItemRules"
-              ></v-textarea>
+              <v-row>
+                <v-col cols="12">
+                  <v-autocomplete
+                    v-model="categoriaNueva"
+                    :rules="categoriaNuevaRules"
+                    label="Categoría"
+                    required
+                    outlined
+                    :items="categoriasC"
+                    item-text="nombreTipoProducto"
+                    item-value="idTipoProductoComercio"
+                  >
+                  </v-autocomplete>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="nombreItem"
+                    :rules="nombreItemRules"
+                    label="Nombre del Item"
+                    required
+                    outlined
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="8">
+                  <v-row>
+                    <v-col cols="6">
+                      <v-text-field
+                        prefix="$"
+                        v-model="precioItem"
+                        :rules="precioItemRules"
+                        label="Precio Actual"
+                        required
+                        outlined
+                        type="number"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="6">
+                      <v-text-field
+                        prefix="$"
+                        v-model="precioAnterior"
+                        :rules="precioAnteriorRules"
+                        label="Precio Anterior"
+                        required
+                        outlined
+                        type="number"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-autocomplete
+                        v-model="etiquetaItem"
+                        :rules="etiquetaItemRules"
+                        label="Etiqueta"
+                        required
+                        outlined
+                        :items="etiquetas"
+                        item-text="nombreEtiqueta"
+                        item-value="idEtiquetaProducto"
+                        prepend-inner-icon="mdi-tag"
+                      >
+                      </v-autocomplete>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-textarea
+                        outlined
+                        label="Descripción"
+                        auto-grow
+                        v-model="descripcionItem"
+                        :rules="descripcionItemRules"
+                      ></v-textarea>
+                    </v-col>
+                  </v-row>
+                </v-col>
+
+                <v-col cols="4">
+                  <v-row>
+                    <v-col cols="12">
+                      <v-file-input
+                        accept="image/*"
+                        label="Logo"
+                        v-model="imagenItem"
+                        @change="urlImagen"
+                        :clearable="false"
+                        outlined
+                        :rules="imagenItemRules"
+                      ></v-file-input>
+                      <div class="d-flex justify-center">
+                        <v-icon v-if="imagenItem === null"
+                          >mdi-camera-plus</v-icon
+                        >
+                        <v-img
+                          v-else
+                          :src="imagenUrl"
+                          max-height="150"
+                          max-width="250"
+                          contain
+                        >
+                        </v-img>
+                      </div>
+                      <div>
+                        *Se Recomienda que las imagen es tengan una relación de
+                        aspecto de 1.2817 Ejemplo 1281.7 x 1000 414 x 323
+                      </div>
+                    </v-col>
+                  </v-row>
+                </v-col>
+              </v-row>
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -145,19 +189,18 @@
               <v-icon left>mdi-delete</v-icon>
               Eliminar
             </v-btn>
-            <v-btn color="green darken-1" text @click="cancelar()">
-              Cancelar
-            </v-btn>
+            <v-btn text @click="cancelar()"> Cancelar </v-btn>
             <v-btn
               color="#f45c04"
               @click="subirImagen()"
               v-if="editando === false"
+              dark
             >
               Guardar
             </v-btn>
             <v-btn
-              color="green darken-1"
-              text
+              color="#f45c04"
+              dark
               @click="guardarEditado()"
               v-if="editando === true"
             >
@@ -194,6 +237,8 @@ export default {
     nombreItemRules: [(v) => !!v || 'Nombre es requerido'],
     precioItem: null,
     precioItemRules: [(v) => !!v || 'Precio es requerido'],
+    precioAnterior: null,
+    precioAnteriorRules: [(v) => !!v || 'Precio Anterior es requerido'],
     imagenItem: null,
     imagenItemRules: [(v) => !!v || 'Imágen es requerido'],
     imagenUrl: '',
@@ -224,16 +269,30 @@ export default {
       env.endpoint + '/tipoProductoComercio.php?id=' + this.idC
     )
 
-    this.categoriasC = cc.data.data.filter((e) => e.estado === 0)
+    if (cc.data.data === false) {
+      this.categoriasC = []
+    } else {
+      this.categoriasC = cc.data.data.filter((e) => e.estado !== 3)
+    }
 
     // Productos del comercio
     const p = await axios.get(
       env.endpoint + '/productos.php?restaurante=' + this.idC
     )
-    this.productosC = p.data.data.filter((a) => a.estado !== 2)
 
-    this.formatearEstadoProducto()
+    if (p.data.data === false) {
+      this.productosC = []
+    } else {
+      this.productosC = p.data.data.filter((a) => a.estado !== 3)
 
+      this.productosC = this.productosC.map((a) => {
+        const es = a.estado !== 2
+        a.estado = es
+        return a
+      })
+    }
+
+    alert(JSON.stringify(this.productosC))
     // Etiquetas de productos
 
     const e = await axios.get(env.endpoint + '/etiquetaProducto.php')
@@ -254,18 +313,24 @@ export default {
       })
     },
     async cambiarEstadoProd(ide, es) {
+      const x = es === false ? '2' : '1'
+
       const e = await axios.patch(env.endpoint + '/productos.php', {
         id: ide,
         campo: 'estado',
-        dato: !es,
+        dato: Number(x),
       })
 
-      this.error = true
-      this.error_msg = e.data.message
+      this.alertCambio(e.data.data, e.data.message)
+      this.actualizarProductos()
     },
-    cambiarProductos(cat) {
+    cambiarProductos() {
+      /*  this.productos = this.productosC.filter(
+        (a) => a.idTipoProducto === this.categoria
+      ) */
+
       this.productos = this.productosC.filter(
-        (a) => a.idTipoProductoComercio === cat
+        (l) => l.idTipoProductoComercio === this.categoria
       )
     },
     urlImagen() {
@@ -322,7 +387,7 @@ export default {
                 /* eslint-enable */
                 //            this.picture = downloadURL
 
-                const js = {
+                /*                 const js = {
                   nombreProducto: this.nombreItem,
                   descripcion: this.descripcionItem,
                   idComercio: this.idC,
@@ -332,10 +397,31 @@ export default {
                   sucursaleExcluidas: '',
                   idTipoProductoDetalle: this.categoriaNueva,
                 }
+ */
+
+                const js = {
+                  nombreProducto: this.nombreItem,
+                  descripcion: this.descripcion,
+                  idComercio: this.idC,
+                  precio: Number(this.precioItem),
+                  precioAnterio: Number(this.precioAnterior),
+                  imagen: downloadURL,
+                  idEtiqueta: this.etiquetaItem,
+                  sucursaleExcluidas: '',
+                  idTipoProductoDetalle: this.categoriaNueva,
+                }
+
+                await alert(JSON.stringify(js))
 
                 const r = await axios.post(env.endpoint + '/productos.php', js)
 
-                this.error = true
+                this.alertCambio(r.data.data, r.data.message)
+
+                this.vaciarProducto()
+                this.cancelar()
+                this.actualizarProductos()
+
+                /*  this.error = true
                 this.error_msg = r.data.message
 
                 this.vaciarProducto()
@@ -346,7 +432,7 @@ export default {
                 )
                 this.productosC = p.data.data.filter((a) => a.estado !== 2)
 
-                this.formatearEstadoProducto()
+                this.formatearEstadoProducto() */
               })
           }
         )
@@ -361,11 +447,12 @@ export default {
       this.nombreItem = pr.nombreProducto
       this.descripcionItem = pr.descripcion
       this.precioItem = pr.precio
+      this.precioAnterior = pr.precioAnterio
       this.imagenItem = new File([''], 'filename')
       this.imagenUrl = pr.imagen
       this.auxImg = pr.imagen
       this.etiquetaItem = pr.idEtiqueta
-      this.categoriaNueva = pr.idTipoProducto
+      this.categoriaNueva = pr.idTipoProductoComercio
     },
     vaciarProducto() {
       this.idPr = null
@@ -378,22 +465,66 @@ export default {
       this.etiquetaItem = null
       this.categoriaNueva = null
       this.auxImg = ''
+      this.precioAnterior = null
     },
     cancelar() {
+      this.vaciarProducto()
       this.dialog = false
       this.editando = false
-      this.vaciarProducto()
     },
-    async eliminarProducto() {
-      const p = await axios.patch(env.endpoint + '/productos.php', {
-        id: this.idPr,
-        campo: 'estado',
-        dato: 2,
-      })
+    eliminarProducto() {
+      this.alertEliminar(this.idPr)
 
-      this.error = true
-      this.error_msg = p.data.message
       this.cancelar()
+      this.actualizarProductos()
+    },
+    async actualizarProductos() {
+      const id = this.$route.params.id
+      let data = (
+        await axios.get(env.endpoint + '/productos.php?restaurante=' + id)
+      ).data.data
+
+      if (data === false) {
+        this.productosC = []
+      } else {
+        data = data.filter((a) => a.estado !== 3)
+        data = data.map((a) => {
+          const es = a.estado !== 2
+          a.estado = es
+          return a
+        })
+
+        this.productosC = data
+        this.cambiarProductos()
+      }
+    },
+    alertCambio(respuesta, mensaje) {
+      const ico = respuesta === true ? 'success' : 'error'
+      this.$swal({ icon: ico, title: mensaje })
+    },
+    alertEliminar(ide) {
+      this.$swal({
+        title: '¿Desea Eliminar el Producto Deportivo?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#F25C05',
+        cancelButtonColor: '#383838',
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          /* this.$swal('Deleted!', 'Your file has been deleted.', 'success') */
+          const js = {
+            id: ide,
+            campo: 'estado',
+            dato: 3,
+          }
+          const e = await axios.patch(env.endpoint + '/productos.php', js)
+
+          this.alertCambio(e.data.data, e.data.message)
+          this.actualizarProductos()
+        }
+      })
     },
     async guardarEditado() {
       if (this.$refs.form.validate()) {
@@ -442,14 +573,30 @@ export default {
                   /* eslint-enable */
                   //            this.picture = downloadURL
 
-                  const e = this.auxEstado === true ? '0' : '1'
+                  const e = this.auxEstado === true ? '1' : '2'
 
-                  const pe = {
-                    idProducto: this.idPr,
+                  /*  {
+ "id":2,
+ "nombreProducto":"Licor de Lima Natural",
+ "descripcion":"15 v/v Licores don Joshé",
+ "idComercio":1,
+ "precio":9.99,
+ "precioAnterior":10.99,
+ "imagen":"licorLimaDon.jpg",
+ "idEtiqueta":0,
+ "sucursaleExcluidas":"",
+ "idTipoProductoDetalle":1,
+ "observaciones":"S/O",
+ "estado":20
+} */
+
+                  const json = {
+                    id: this.idPr,
                     nombreProducto: this.nombreItem,
                     descripcion: this.descripcionItem,
                     idComercio: this.idC,
-                    precio: this.precioItem,
+                    precio: Number(this.precioItem),
+                    precioAnterior: Number(this.precioAnterior),
                     imagen: downloadURL,
                     idEtiqueta: this.etiquetaItem,
                     sucursaleExcluidas: '',
@@ -458,52 +605,68 @@ export default {
                     estado: Number(e),
                   }
 
-                  const r = await axios.put(env.endpoint + '/productos.php', pe)
+                  const r = await axios.put(
+                    env.endpoint + '/productos.php',
+                    json
+                  )
 
-                  this.error = true
-                  this.error_msg = r.data.message
+                  this.alertCambio(r.data.data, r.data.message)
 
                   this.vaciarProducto()
-
+                  this.cancelar()
+                  this.actualizarProductos()
+                  /*
                   // Productos del comercio
                   const p = await axios.get(
                     env.endpoint + '/productos.php?restaurante=' + this.idC
                   )
                   this.productosC = p.data.data.filter((a) => a.estado !== 2)
 
-                  this.formatearEstadoProducto()
+                  this.formatearEstadoProducto() */
                 })
             }
           )
         } else {
-          const pe = {
-            idProducto: this.idPr,
+          /*  const json = {
+                    id: this.idPr,
+                    nombreProducto: this.nombreItem,
+                    descripcion: this.descripcionItem,
+                    idComercio: this.idC,
+                    precio: this.precioItem,
+                    precioAnterior: this.precioAnterior,
+                    imagen: downloadURL,
+                    idEtiqueta: this.etiquetaItem,
+                    sucursaleExcluidas: '',
+                    idTipoProductoDetalle: this.categoriaNueva,
+                    observaciones: 'S/O',
+                    estado: Number(e),
+                  } */
+
+          const e = this.auxEstado === true ? '1' : '2'
+
+          const json = {
+            id: this.idPr,
             nombreProducto: this.nombreItem,
             descripcion: this.descripcionItem,
             idComercio: this.idC,
-            precio: this.precioItem,
+            precio: Number(this.precioItem),
+            precioAnterior: Number(this.precioAnterior),
             imagen: this.auxImg,
             idEtiqueta: this.etiquetaItem,
             sucursaleExcluidas: '',
             idTipoProductoDetalle: this.categoriaNueva,
             observaciones: 'S/O',
-            estado: this.auxEstado,
+            estado: Number(e),
           }
 
-          const r = await axios.put(env.endpoint + '/productos.php', pe)
+          const r = await axios.put(env.endpoint + '/productos.php', json)
 
-          this.error = true
-          this.error_msg = r.data.message
+          this.alertCambio(r.data.data, r.data.message)
 
           this.vaciarProducto()
-
-          // Productos del comercio
-          const p = await axios.get(
-            env.endpoint + '/productos.php?restaurante=' + this.idC
-          )
-          this.productosC = p.data.data.filter((a) => a.estado !== 2)
-
-          this.formatearEstadoProducto()
+          this.cancelar()
+          this.actualizarProductos()
+          alert(JSON.stringify(json))
         }
       }
     },

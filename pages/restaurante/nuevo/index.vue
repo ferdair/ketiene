@@ -57,11 +57,12 @@
             </v-col>
             <v-col cols="12" md="8">
               <v-text-field
-                label="Eslogan"
+                label="Nombre Largo"
                 outlined
                 :rules="esloganRules"
                 required
                 v-model="eslogan"
+                placeholder="Nombre completo del restaurante"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
@@ -401,6 +402,18 @@
                     >
                     </v-checkbox>
                     <v-checkbox
+                      v-model="checkboxAmericanExpress"
+                      label="American Express"
+                      color="#f45c04"
+                    >
+                    </v-checkbox>
+                    <v-checkbox
+                      v-model="checkboxDinnersClub"
+                      label="Dinners Club"
+                      color="#f45c04"
+                    >
+                    </v-checkbox>
+                    <v-checkbox
                       v-model="checkboxDebito"
                       label="Debito"
                       color="#f45c04"
@@ -517,7 +530,7 @@ export default {
       nombreP: '',
       nombrePRules: [(v) => !!v || 'Nombre del Propietario es requerido'],
       eslogan: '',
-      esloganRules: [(v) => !!v || 'Eslogan es requerido'],
+      esloganRules: [(v) => !!v || 'Nombre completo es requerido'],
       telP: '',
       telPRules: [
         (v) => !!v || 'Telefono es requerido',
@@ -542,7 +555,7 @@ export default {
       ciudades: [],
       auxCiudades: [],
       ciudad: null,
-      ciudadRules: [(v) => !!v || 'Logo es requerido'],
+      ciudadRules: [(v) => !!v || 'Ciudad es requerido'],
       direccion: '',
       direccionRules: [(v) => !!v || 'Dirección es requerido'],
       telefono: '',
@@ -570,6 +583,8 @@ export default {
       checkboxTarjetas: false,
       checkboxVisa: false,
       checkboxMastercard: false,
+      checkboxAmericanExpress: false,
+      checkboxDinnersClub: false,
       checkboxDebito: false,
       horarios: [
         { dia: 'Lunes', valor: false, hora: ['08:00', '20:00'] },
@@ -659,7 +674,6 @@ export default {
           lng: this.currentPlace.geometry.location.lng(),
         }
         this.markers.splice(0, 1, { position: marker })
-        alert(JSON.stringify(this.markers))
         this.places.splice(0, 1, this.currentPlace)
         this.center = marker
         this.currentPlace = null
@@ -699,7 +713,12 @@ export default {
       )
     },
     async registrar() {
-      if (this.$refs.form.validate()) {
+      if (
+        this.$refs.form.validate() &&
+        (this.checkboxAtencionLocal === true ||
+          this.checkboxDomicilio === true ||
+          this.checkboxLlevar === true)
+      ) {
         const ws = '+593' + this.whatsapp.slice(1)
 
         // OPCIONES
@@ -760,6 +779,18 @@ export default {
           t += '0'
         }
 
+        if (this.checkboxAmericanExpress === true) {
+          t += '1'
+        } else {
+          t += '0'
+        }
+
+        if (this.checkboxDinnersClub === true) {
+          t += '1'
+        } else {
+          t += '0'
+        }
+
         if (this.checkboxDebito === true) {
           t += '1'
         } else {
@@ -793,7 +824,7 @@ export default {
           nombreComercio: this.nombre,
           /*  imagenLogo: this.logoUpload,
           imagenPortada: this.bannerUpload, */
-          eslogan: this.eslogan,
+          nombreLargo: this.eslogan,
           whatsappPropietario: ws,
           llamadasPropietario: this.telP,
           nombrePropietario: this.nombreP,
@@ -822,10 +853,12 @@ export default {
 
         await this.subirImagen('logos', this.logo)
         await this.subirImagen('banners', this.banner)
+      } else {
+        alert('Seleccione al menos un modo de atención')
       }
     },
     abrirDialog() {
-      if (this.tipoRestaurante === 'Otro') {
+      if (this.tipoRestaurante === 'Nuevo') {
         this.dialog = true
       }
     },
@@ -926,17 +959,30 @@ export default {
     quitarKemas(i) {
       this.kmasTiene.splice(i, 1)
     },
-    enviarJson() {
-      const j = axios.post(env.endpoint + '/datosRestaurante.php', this.jsonenv)
+    async enviarJson() {
+      const j = await axios.post(
+        env.endpoint + '/datosRestaurante.php',
+        this.jsonenv
+      )
 
-      if (j.data.code === 200) {
+      /* if (j.data.code === 200) {
         this.error = true
         this.error_msg = 'Se registró correctamente'
 
         this.$router.push({
           path: `/restaurante/${j.data.data.idComercio}`,
         })
-      }
+      } */
+      const boo = j.data.code === 200
+
+      this.alertRegistrar(boo, j.data.message)
+      this.$router.push({
+        path: `/restaurante/${j.data.data[0].idComercio}`,
+      })
+    },
+    alertRegistrar(respuesta, mensaje) {
+      const ico = respuesta === true ? 'success' : 'error'
+      this.$swal({ icon: ico, title: mensaje, confirmButtonColor: '#f45c04' })
     },
     alertar() {
       return isNaN(this.envio)
@@ -958,7 +1004,7 @@ export default {
     // TIPOS DE RESTAURANTES
     this.tiposRestaurantes = aux.data.data[0].tipoComercio
 
-    this.tiposRestaurantes.splice(0, 0, { nombreTipoComercio: 'Otro' })
+    this.tiposRestaurantes.splice(0, 0, { nombreTipoComercio: 'Nuevo' })
 
     // PROVINCIAS
     this.provincias = aux.data.data[0].provincia

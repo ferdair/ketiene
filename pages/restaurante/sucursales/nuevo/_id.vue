@@ -2,47 +2,22 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h3>Sucursales del Restaurante</h3>
+        <h3>Registrar Nueva Sucursal</h3>
       </v-col>
-      <v-col cols="12" md="8">
-        <v-chip-group
-          mandatory
-          active-class="orange--text"
-          show-arrows
-          v-model="idSucur"
-        >
-          <v-chip
-            v-for="sucursal in sucursales"
-            :key="sucursal.idSucursales"
-            @click="cambiar(sucursal.idSucursales)"
-          >
-            {{ sucursal.etiquetaSucursal }}
-          </v-chip>
-        </v-chip-group>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-btn
-          color="#f45c04"
-          rounded
-          dark
-          :to="`/restaurante/sucursales/nuevo/${id}`"
-        >
-          <v-icon left large>mdi-plus</v-icon>Agregar sucursal
-        </v-btn>
-      </v-col>
-      <!--  <v-col cols="12" v-if="mostrarEtiqueta">
-        <v-text-field
-          v-model="etqSucursal"
-          outlined
-          :rules="etqSucursalRules"
-          label="Etiqueta de la Sucursal"
-          hint="Ejemplo: Sucursal Centro"
-        >
-        </v-text-field>
-      </v-col> -->
+
       <v-col>
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-row justify="start" align="start">
+            <v-col cols="8">
+              <v-text-field
+                v-model="etqSucursal"
+                outlined
+                :rules="etqSucursalRules"
+                label="Etiqueta de la Sucursal"
+                hint="Ejemplo: Sucursal Centro"
+              >
+              </v-text-field>
+            </v-col>
             <v-col cols="12" md="8">
               <v-row>
                 <h4>Ubicación</h4>
@@ -323,12 +298,12 @@
                   </v-container>
                 </v-col>
               </v-row>
-              <v-row>
+              <!-- <v-row>
                 <v-col cols="12" md="2">
                   <h5>Estado Sucursal</h5>
                   <v-switch v-model="estado" inset color="green"></v-switch>
                 </v-col>
-              </v-row>
+              </v-row> -->
             </v-col>
 
             <v-col cols="12">
@@ -441,71 +416,6 @@ export default {
 
     // CIUDADES
     this.auxCiudades = aux.data.data[0].ciudad
-
-    // SUCURSALES
-
-    const com = await axios.get(env.endpoint + '/sucursales.php?id=' + this.id)
-    this.sucursales = com.data.data.filter((a) => a.estado !== 3)
-    this.idSu = com.data.data[0].idSucursales
-    this.ciudad = com.data.data[0].idCiudad
-
-    this.provincia = this.auxCiudades.filter(
-      (e) => e.id_ciudad === this.ciudad
-    )[0].provincia
-
-    this.setCiudades()
-
-    this.direccion = com.data.data[0].direccion
-    this.etqSucursal = com.data.data[0].etiquetaSucursal
-    this.tipoSucur = com.data.data[0].tipo
-
-    this.telefono = com.data.data[0].llamadasLocal
-    this.whatsapp = com.data.data[0].whatsappLocal
-
-    com.data.data[0].keMasTiene[0].dias.forEach((element, i) => {
-      this.horarios[i].valor = element.abre
-      this.horarios[i].hora = element.horario
-    })
-
-    com.data.data[0].keMasTiene[0].detalle.forEach((element, i) => {
-      const x = { icono: element.icono, detalle: element.textoDetalle }
-      this.kmasTiene.splice(0, 0, x)
-    })
-
-    this.idKeMas = com.data.data[0].keMasTiene[0].idKeMas
-
-    if (isNaN(Number(com.data.data[0].domicilio))) {
-      this.envio = com.data.data[0].domicilio
-    } else {
-      this.costoEnvio = com.data.data[0].domicilio
-      this.envio = com.data.data[0].domicilio
-    }
-    this.checkboxEfectivo = com.data.data[0].keMasTiene[0].metodosPago[0]
-    this.checkboxTransferencia = com.data.data[0].keMasTiene[0].metodosPago[1]
-    this.checkboxTarjetas = com.data.data[0].keMasTiene[0].metodosPago[2]
-
-    this.checkboxVisa = com.data.data[0].keMasTiene[0].tarjetasAceptadas[0]
-    this.checkboxMastercard =
-      com.data.data[0].keMasTiene[0].tarjetasAceptadas[1]
-    this.checkboxAmericanExpress =
-      com.data.data[0].keMasTiene[0].tarjetasAceptadas[2]
-    this.checkboxDinnersClub =
-      com.data.data[0].keMasTiene[0].tarjetasAceptadas[3]
-    this.checkboxDebito = com.data.data[0].keMasTiene[0].tarjetasAceptadas[4]
-
-    this.estado = com.data.data[0].estado !== 2
-
-    const marker = {
-      lat: Number(com.data.data[0].latitud),
-      lng: Number(com.data.data[0].longitud),
-    }
-
-    this.markers = [{ position: marker }]
-    /*
-    this.markers.splice(0, 1, { position: marker }) */
-
-    this.center = marker
-    this.currentPlace = null
   },
   methods: {
     geolocate() {
@@ -516,69 +426,7 @@ export default {
         }
       })
     },
-    cambiar(ide) {
-      this.mostrarEtiqueta = false
-      const su = this.sucursales.filter((i) => i.idSucursales === ide)[0]
 
-      this.ciudad = su.idCiudad
-
-      this.provincia = this.auxCiudades.filter(
-        (e) => e.id_ciudad === this.ciudad
-      )[0].provincia
-
-      this.setCiudades()
-      this.idSu = ide
-      this.direccion = su.direccion
-
-      this.telefono = su.llamadasLocal
-      this.whatsapp = su.whatsappLocal
-      this.etqSucursal = su.etiquetaSucursal
-      this.tipoSucur = su.tipo
-
-      su.keMasTiene[0].dias.forEach((element, i) => {
-        this.horarios[i].valor = element.abre
-        this.horarios[i].hora = element.horario
-      })
-
-      this.kmasTiene = []
-
-      su.keMasTiene[0].detalle.forEach((element, i) => {
-        const x = { icono: element.icono, detalle: element.textoDetalle }
-        this.kmasTiene.splice(0, 0, x)
-      })
-
-      this.idKeMas = su.keMasTiene[0].idKeMas
-
-      if (isNaN(Number(su.domicilio))) {
-        this.envio = su.domicilio
-      } else {
-        this.costoEnvio = su.domicilio
-        this.envio = su.domicilio
-      }
-      this.checkboxEfectivo = su.keMasTiene[0].metodosPago[0]
-      this.checkboxTransferencia = su.keMasTiene[0].metodosPago[1]
-      this.checkboxTarjetas = su.keMasTiene[0].metodosPago[2]
-
-      this.checkboxVisa = su.keMasTiene[0].tarjetasAceptadas[0]
-      this.checkboxMastercard = su.keMasTiene[0].tarjetasAceptadas[1]
-      this.checkboxAmericanExpress = su.keMasTiene[0].tarjetasAceptadas[2]
-      this.checkboxDinnersClub = su.keMasTiene[0].tarjetasAceptadas[3]
-      this.checkboxDebito = su.keMasTiene[0].tarjetasAceptadas[4]
-
-      this.estado = su.estado !== 2
-
-      const marker = {
-        lat: Number(su.latitud),
-        lng: Number(su.longitud),
-      }
-
-      this.markers = [{ position: marker }]
-      /*
-    this.markers.splice(0, 1, { position: marker }) */
-
-      this.center = marker
-      this.currentPlace = null
-    },
     setPlace(place) {
       this.currentPlace = place
     },
@@ -693,8 +541,29 @@ export default {
         /* const es = es !== 2
         this.estado = es */
 
-        const es = this.estado === false ? '2' : '1'
         this.jsonenv = {
+          idComercio: this.id,
+          etiquetaSucursal: this.etqSucursal,
+          direccion: this.direccion,
+          geolocalizacion:
+            this.markers[0].position.lat + '||' + this.markers[0].position.lng,
+          llamadasLocal: this.telefono,
+          whatsappLocal: ws,
+          domicilio: this.envio,
+          idCiudad: this.ciudad,
+          keMasTiene: km,
+          metodosPago: mp,
+          tarjetasAceptadas: t,
+          dias: d,
+          lunes: h[0],
+          martes: h[1],
+          miercoles: h[2],
+          jueves: h[3],
+          viernes: h[4],
+          sabado: h[5],
+          domingo: h[6],
+        }
+        /* this.jsonenv = {
           idSucursal: Number(this.idSu),
           idComercio: Number(this.$route.params.id),
           idKeMasTiene: this.idKeMas, // DEBERIA CAMBIAR
@@ -720,7 +589,7 @@ export default {
           viernes: h[4],
           sabado: h[5],
           domingo: h[6],
-        }
+        } */
 
         this.enviarJson()
 
@@ -764,7 +633,7 @@ export default {
       this.kmasTiene.splice(i, 1)
     },
     async enviarJson() {
-      const j = await axios.put(env.endpoint + '/sucursales.php', this.jsonenv)
+      const j = await axios.post(env.endpoint + '/sucursales.php', this.jsonenv)
 
       /* if (j.data.code === 200) {
         this.error = true
@@ -776,11 +645,9 @@ export default {
       } */
       const boo = j.data.code === 200
 
-      const g = Number(this.$route.params.id)
-
       this.alertRegistrar(boo, j.data.message)
       this.$router.push({
-        path: `/restaurante/${g}`,
+        path: `/restaurante/${this.id}`,
       })
     },
     alertar() {

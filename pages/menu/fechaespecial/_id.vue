@@ -54,6 +54,9 @@
               </h3></span
             >
             <v-spacer></v-spacer>
+            <v-btn icon @click="alertEliminar(promo.idFechaEspecial)"
+              ><v-icon>mdi-delete</v-icon></v-btn
+            >
             <v-btn icon @click="editarPromo(promo.idFechaEspecial)"
               ><v-icon>mdi-pencil</v-icon></v-btn
             >
@@ -75,25 +78,80 @@
           >
           <v-card-text v-if="otro === false">
             <v-form ref="form" v-model="valid" lazy-validation>
-              <v-text-field
-                v-model="tituloPromo"
-                :rules="tituloPromoRules"
-                label="Título"
-                required
-                outlined
-              ></v-text-field>
-              <v-autocomplete
-                v-model="tipoPromo"
-                :rules="tipoPromoRules"
-                label="Tipo de Fecha Especial"
-                required
-                outlined
-                :items="tiposFechas"
-                item-text="tituloFecha"
-                item-value="idTipoFechaEspecial"
-                @change="mostrarFormTipo"
-              >
-              </v-autocomplete>
+              <v-row>
+                <v-col cols="7">
+                  <v-row>
+                    <v-col cols="12">
+                      <v-text-field
+                        v-model="tituloPromo"
+                        :rules="tituloPromoRules"
+                        label="Título"
+                        required
+                        outlined
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="10">
+                      <v-autocomplete
+                        v-model="tipoPromo"
+                        :rules="tipoPromoRules"
+                        label="Tipo de Fecha Especial"
+                        required
+                        outlined
+                        :items="tiposFechas"
+                        item-text="tituloFecha"
+                        item-value="idTipoFechaEspecial"
+                        @change="mostrarFormTipo"
+                      >
+                      </v-autocomplete>
+                    </v-col>
+                    <v-col cols="6">
+                      <v-text-field
+                        prefix="$"
+                        v-model="precioPromo"
+                        :rules="precioPromoRules"
+                        label="Precio"
+                        required
+                        outlined
+                        type="number"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-textarea
+                        outlined
+                        label="Descripción"
+                        auto-grow
+                        v-model="descripcionPromo"
+                      ></v-textarea>
+                    </v-col>
+                  </v-row>
+                </v-col>
+                <v-col cols="5">
+                  <v-file-input
+                    accept="image/*"
+                    label="Logo"
+                    v-model="imagenPromo"
+                    @change="urlImagen"
+                    :clearable="false"
+                    outlined
+                    :rules="imagenPromoRules"
+                  ></v-file-input>
+                  <div class="d-flex justify-center">
+                    <v-icon v-if="imagenPromo === null">mdi-camera-plus</v-icon>
+                    <v-img
+                      v-else
+                      :src="imagenUrl"
+                      max-height="150"
+                      max-width="250"
+                      contain
+                    >
+                    </v-img>
+                  </div>
+                  <div>
+                    *Se Recomienda que las imagen es tengan una relación de
+                    aspecto de 1.2817 Ejemplo 1281.7 x 1000 414 x 323
+                  </div>
+                </v-col>
+              </v-row>
 
               <!-- <v-text-field
                 v-model="etiquetaPromo"
@@ -103,35 +161,7 @@
                 outlined
                 hint="Ejemplo: Gratis"
               ></v-text-field> -->
-              <v-text-field
-                prefix="$"
-                v-model="precioPromo"
-                :rules="precioPromoRules"
-                label="Precio"
-                required
-                outlined
-                type="number"
-              ></v-text-field>
-              <v-file-input
-                accept="image/*"
-                label="Logo"
-                v-model="imagenPromo"
-                @change="urlImagen"
-                :clearable="false"
-                outlined
-                :rules="imagenPromoRules"
-              ></v-file-input>
-              <div class="d-flex justify-center">
-                <v-icon v-if="imagenPromo === null">mdi-camera-plus</v-icon>
-                <v-img
-                  v-else
-                  :src="imagenUrl"
-                  max-height="150"
-                  max-width="250"
-                  contain
-                >
-                </v-img>
-              </div>
+
               <!-- <v-autocomplete
                 v-model="etiquetaItem"
                 :rules="etiquetaItemRules"
@@ -143,12 +173,6 @@
                 item-value="idEtiquetaProducto"
               >
               </v-autocomplete> -->
-              <v-textarea
-                outlined
-                label="Descripción"
-                auto-grow
-                v-model="descripcionPromo"
-              ></v-textarea>
             </v-form>
           </v-card-text>
           <v-card-text v-if="otro === true">
@@ -244,10 +268,8 @@
           </v-card-text>
           <v-card-actions v-if="otro === true">
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="cancelar()">
-              Cancelar
-            </v-btn>
-            <v-btn color="green darken-1" text @click="registrarCategoria()">
+            <v-btn text @click="cancelar()"> Cancelar </v-btn>
+            <v-btn color="f45c04" dark text @click="registrarCategoria()">
               Guardar
             </v-btn>
           </v-card-actions>
@@ -262,19 +284,18 @@
               <v-icon left>mdi-delete</v-icon>
               Eliminar
             </v-btn>
-            <v-btn color="green darken-1" text @click="cancelar()">
-              Cancelar
-            </v-btn>
+            <v-btn text @click="cancelar()"> Cancelar </v-btn>
             <v-btn
               color="#f45c04"
               @click="subirImagen()"
               v-if="editando === false"
+              dark
             >
               Guardar
             </v-btn>
             <v-btn
-              color="green darken-1"
-              text
+              color="#f45c04"
+              dark
               @click="guardarEditado()"
               v-if="editando === true"
             >
@@ -381,10 +402,12 @@ export default {
 
     // Fechas Especiales
 
-    const c = await axios.get(
+    /* const c = await axios.get(
       env.endpoint + '/fechasEspeciales.php?id=' + this.idC
     )
-    this.fechasEspeciales = c.data.data.filter((a) => a.estado !== 2)
+    this.fechasEspeciales = c.data.data.filter((a) => a.estado !== 2) */
+
+    this.actualizarPromo()
 
     // Tipos de Fechas Especiales
     const f = await axios.get(env.endpoint + '/tipoFechaEspecial.php')
@@ -396,15 +419,73 @@ export default {
     })
   },
   methods: {
+    async actualizarPromo() {
+      const id = this.$route.params.id
+      let data = (
+        await axios.get(env.endpoint + '/fechasEspeciales.php?id=' + id)
+      ).data.data
+
+      if (data === false) {
+        this.fechasEspeciales = []
+      } else {
+        data = data.filter((a) => a.estado !== 3)
+        data = data.map((a) => {
+          const es = a.estado !== 2
+          a.estado = es
+          return a
+        })
+
+        this.fechasEspeciales = data
+      }
+    },
     async cambiarEstadoPromo(ide, es) {
-      const e = await axios.patch(env.endpoint + '/fechasEspeciales.php', {
+      /* const e = await axios.patch(env.endpoint + '/fechasEspeciales.php', {
         id: ide,
         campo: 'estado',
         dato: es,
       })
 
       this.error = true
-      this.error_msg = e.data.message
+      this.error_msg = e.data.message */
+      const x = es === false ? '2' : '1'
+      const e = await axios.patch(env.endpoint + '/fechasEspeciales.php', {
+        id: ide,
+        campo: 'estado',
+        dato: Number(x),
+      })
+      this.alertCambio(e.data.data, e.data.message)
+      this.actualizarPromo()
+    },
+    alertEliminar(ide) {
+      this.$swal({
+        title: '¿Desea Eliminar la Fecha Especial?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#F25C05',
+        cancelButtonColor: '#383838',
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          /* this.$swal('Deleted!', 'Your file has been deleted.', 'success') */
+          const js = {
+            id: ide,
+            campo: 'estado',
+            dato: 3,
+          }
+          const e = await axios.patch(
+            env.endpoint + '/fechasEspeciales.php',
+            js
+          )
+
+          this.alertCambio(e.data.data, e.data.message)
+          this.actualizarPromo()
+        }
+      })
+    },
+    alertCambio(respuesta, mensaje) {
+      const ico = respuesta === true ? 'success' : 'error'
+      this.$swal({ icon: ico, title: mensaje })
     },
     urlImagen() {
       if (this.imagenPromo) {
@@ -470,6 +551,7 @@ export default {
                 const js = {
                   tituloFechaEspecial: this.tituloPromo,
                   descripcion: this.descripcionPromo,
+                  imagen: downloadURL,
                   idComercio: this.idC,
                   precio: this.precioPromo,
                   tipoFechaEspecial: this.tipoPromo,
@@ -479,8 +561,12 @@ export default {
                   env.endpoint + '/fechasEspeciales.php',
                   js
                 )
+                this.alertCambio(r.data.data, r.data.message)
 
-                this.error = true
+                this.vaciarPromo()
+                this.cancelar()
+                this.actualizarPromo()
+                /* this.error = true
                 this.error_msg = r.data.message
 
                 this.cancelar()
@@ -491,7 +577,7 @@ export default {
                 )
                 this.fechasEspeciales = p.data.data.filter(
                   (a) => a.estado !== 2
-                )
+                ) */
               })
           }
         )
@@ -532,8 +618,11 @@ export default {
       this.otro = false
       this.vaciarPromo()
     },
-    async eliminarPromo() {
-      const p = await axios.patch(env.endpoint + '/fechasEspeciales.php', {
+    eliminarPromo() {
+      this.alertEliminar(this.idPr)
+      this.cancelar()
+      this.actualizarPromo()
+      /* const p = await axios.patch(env.endpoint + '/fechasEspeciales.php', {
         id: this.idPr,
         campo: 'estado',
         dato: 2,
@@ -541,7 +630,7 @@ export default {
 
       this.error = true
       this.error_msg = p.data.message
-      this.cancelar()
+      this.cancelar() */
     },
     async guardarEditado() {
       if (this.$refs.form.validate()) {
@@ -590,8 +679,6 @@ export default {
                   /* eslint-enable */
                   //            this.picture = downloadURL
 
-                  const e = this.auxEstado === true ? 1 : 0
-
                   const pe = {
                     idFechaEspecial: this.idPr,
                     tituloFechaEspecial: this.tituloPromo,
@@ -600,7 +687,7 @@ export default {
                     idComercio: this.idC,
                     precio: this.precioPromo,
                     tipoFechaEspecial: this.tipoPromo,
-                    estado: e,
+                    estado: this.auxEstado,
                     observaciones: 'S/O',
                   }
 
@@ -609,7 +696,13 @@ export default {
                     pe
                   )
 
-                  this.error = true
+                  this.alertCambio(r.data.data, r.data.message)
+
+                  this.vaciarPromo()
+                  this.cancelar()
+                  this.actualizarPromo()
+
+                  /* this.error = true
                   this.error_msg = r.data.message
 
                   this.cancelar()
@@ -620,7 +713,7 @@ export default {
                   )
                   this.fechasEspeciales = p.data.data.filter(
                     (a) => a.estado !== 2
-                  )
+                  ) */
                 })
             }
           )
@@ -639,7 +732,12 @@ export default {
 
           const r = await axios.put(env.endpoint + '/fechasEspeciales.php', pe)
 
-          this.error = true
+          this.alertCambio(r.data.data, r.data.message)
+
+          this.vaciarPromo()
+          this.cancelar()
+          this.actualizarPromo()
+          /*  this.error = true
           this.error_msg = r.data.message
 
           this.cancelar()
@@ -648,7 +746,7 @@ export default {
           const p = await axios.get(
             env.endpoint + '/fechasEspeciales.php?id=' + this.idC
           )
-          this.fechasEspeciales = p.data.data.filter((a) => a.estado !== 2)
+          this.fechasEspeciales = p.data.data.filter((a) => a.estado !== 2) */
         }
       }
     },

@@ -44,11 +44,12 @@
             </v-col>
             <v-col cols="12" md="10">
               <v-text-field
-                label="Eslogan"
+                label="Nombre Largo"
                 outlined
                 :rules="esloganRules"
                 required
                 v-model="eslogan"
+                placeholder="Nombre completo del restaurante"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="5">
@@ -123,12 +124,15 @@
               </v-checkbox>
             </v-col>
             <v-col cols="12">
-              <v-btn text depressed :to="`/restaurante/${this.id}`">
+              <!--  <v-btn text depressed :to="`/restaurante/${this.id}`">
                 Regresar
-              </v-btn>
-              <v-btn color="#f45c04" dark @click="registrar">
+              </v-btn> -->
+              <!-- <v-btn color="#f45c04" dark @click="registrar">
                 Editar Restaurante
-              </v-btn>
+              </v-btn> -->
+              <v-btn color="#f45c04" dark @click="registrar"
+                ><v-icon>mdi-arrow-expand-up</v-icon> Guardar Datos</v-btn
+              >
             </v-col>
           </v-row>
         </v-form>
@@ -230,7 +234,7 @@ export default {
       nombreP: '',
       nombrePRules: [(v) => !!v || 'Nombre del Propietario es requerido'],
       eslogan: '',
-      esloganRules: [(v) => !!v || 'Eslogan es requerido'],
+      esloganRules: [(v) => !!v || 'Nombre largo es requerido'],
       telP: '',
       telPRules: [
         (v) => !!v || 'Telefono es requerido',
@@ -333,7 +337,12 @@ export default {
       )
     },
     async registrar() {
-      if (this.$refs.form.validate()) {
+      if (
+        this.$refs.form.validate() &&
+        (this.checkboxAtencionLocal === true ||
+          this.checkboxDomicilio === true ||
+          this.checkboxLlevar === true)
+      ) {
         const ws = '+593' + this.telP.slice(1)
 
         // OPCIONES
@@ -357,16 +366,18 @@ export default {
           op += '0'
         }
 
+        let est
+
         if (this.estado === true) {
-          this.estado = 0
+          est = 1
         } else {
-          this.estado = 1
+          est = 2
         }
 
         this.jsonenv = {
           id: Number(this.$route.params.id),
           nombre: this.nombre,
-          eslogan: this.eslogan,
+          nombreLargo: this.eslogan,
           whatsappPropietario: ws,
           llamadasPropietario: this.telP,
           nombrePropietario: this.nombreP,
@@ -374,7 +385,7 @@ export default {
           opciones: op,
           identificador: this.identificador,
           observaciones: '',
-          estado: this.estado,
+          estado: est,
         }
 
         if (this.logo === null) {
@@ -389,15 +400,15 @@ export default {
           await this.subirImagen('banners', this.banner)
         }
 
-        alert(JSON.stringify(this.jsonenv))
-
         if (this.jsonenv.imagenPortada && this.jsonenv.imagenLogo) {
           this.enviarJson()
         }
+      } else {
+        alert('Seleccione al menos un modo de atención')
       }
     },
     abrirDialog() {
-      if (this.tipoRestaurante === 'Otro') {
+      if (this.tipoRestaurante === 'Nuevo') {
         this.dialog = true
       }
     },
@@ -503,18 +514,28 @@ export default {
         env.endpoint + '/datosRestaurante.php',
         this.jsonenv
       )
+      const boo = j.data.code === 200
 
-      if (j.data.code === 200) {
+      const ide = Number(this.$route.params.id)
+      this.alertRegistrar(boo, j.data.message)
+      this.$router.push({
+        path: `/restaurante/${ide}`,
+      })
+      /* if (j.data.code === 200) {
         this.error = true
         this.error_msg = 'Se registró correctamente'
 
         this.$router.push({
           path: `/restaurante/${this.id}`,
         })
-      }
+      } */
     },
     alertar() {
       return isNaN(this.envio)
+    },
+    alertRegistrar(respuesta, mensaje) {
+      const ico = respuesta === true ? 'success' : 'error'
+      this.$swal({ icon: ico, title: mensaje, confirmButtonColor: '#f45c04' })
     },
   },
   async mounted() {
@@ -526,7 +547,7 @@ export default {
     // TIPOS DE RESTAURANTES
     this.tiposRestaurantes = aux.data.data[0].tipoComercio
 
-    this.tiposRestaurantes.splice(0, 0, { nombreTipoComercio: 'Otro' })
+    this.tiposRestaurantes.splice(0, 0, { nombreTipoComercio: 'Nuevo' })
 
     // PROVINCIAS
     this.provincias = aux.data.data[0].provincia
@@ -543,7 +564,7 @@ export default {
     this.nombre = com.data.data[0].nombre
     this.identificador = com.data.data[0].identificador
     this.nombreP = com.data.data[0].nombrePropietario
-    this.eslogan = com.data.data[0].eslogan
+    this.eslogan = com.data.data[0].nombreLargo
     this.telP = com.data.data[0].llamadasPropietario
     this.logoUrl = com.data.data[0].imagenLogo
     this.auxlogoUrl = com.data.data[0].imagenLogo
@@ -553,7 +574,8 @@ export default {
     this.checkboxDomicilio = com.data.data[0].opciones[1]
     this.checkboxLlevar = com.data.data[0].opciones[2]
 
-    this.estado = !com.data.data[0].sucursales[0].estado
+    const es = com.data.data[0].estado !== 2
+    this.estado = es
   },
 }
 </script>
