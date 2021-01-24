@@ -50,7 +50,9 @@
               ><h3 class="pl-4">{{ promo.tituloPromocion }}</h3>
               <v-subheader>{{ promo.subtituloPromocion }}</v-subheader> </span
             ><v-spacer></v-spacer>
-
+            <v-btn icon @click="alertEliminar(promo.idPromocion)"
+              ><v-icon>mdi-delete</v-icon></v-btn
+            >
             <v-btn icon @click="editarPromo(promo.idPromocion)"
               ><v-icon>mdi-pencil</v-icon></v-btn
             >
@@ -142,17 +144,21 @@
                     >
                     </v-img>
                   </div>
+                  <div>
+                    *Se Recomienda que las imagen es tengan una relación de
+                    aspecto de 1.2817 Ejemplo 1281.7 x 1000 414 x 323
+                  </div>
                 </v-col>
               </v-row>
               <v-row v-for="(horario, i) in horarios" :key="i">
                 <v-col cols="12" md="4">
                   <v-checkbox
-                    v-model="horario.valor"
+                    v-model="horario.abre"
                     :label="horario.dia"
                     color="#f45c04"
                   ></v-checkbox>
                 </v-col>
-                <v-col cols="12" md="8" v-if="horario.valor">
+                <v-col cols="12" md="8" v-if="horario.abre">
                   <!--  <v-range-slider
                   hint="Hora de atención"
                   max="24"
@@ -168,7 +174,7 @@
                     <v-col cols="12" md="4">
                       <v-text-field
                         type="time"
-                        v-model="horario.hora[0]"
+                        v-model="horario.horario[0]"
                         color="#f45c04"
                         :rules="horarioRules"
                       ></v-text-field
@@ -176,7 +182,7 @@
                     <v-col cols="12" md="4">
                       <v-text-field
                         type="time"
-                        v-model="horario.hora[1]"
+                        v-model="horario.horario[1]"
                         color="#f45c04"
                         :rules="horarioRules"
                       ></v-text-field
@@ -328,13 +334,13 @@ export default {
     imagenUrl: '',
     descripcionPromo: '',
     horarios: [
-      { dia: 'Lunes', valor: false, hora: ['08:00', '20:00'] },
-      { dia: 'Martes', valor: false, hora: ['08:00', '20:00'] },
-      { dia: 'Miércoles', valor: false, hora: ['08:00', '20:00'] },
-      { dia: 'Jueves', valor: false, hora: ['08:00', '20:00'] },
-      { dia: 'Viernes', valor: false, hora: ['08:00', '20:00'] },
-      { dia: 'Sábado', valor: false, hora: ['08:00', '20:00'] },
-      { dia: 'Domingo', valor: false, hora: ['08:00', '20:00'] },
+      { dia: 'Lunes', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Martes', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Miércoles', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Jueves', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Viernes', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Sábado', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Domingo', abre: false, horario: ['08:00', '20:00'] },
     ],
     horarioRules: [(v) => !!v || 'El horatio es requerido'],
     error: false,
@@ -396,11 +402,11 @@ export default {
     },
     alertEliminar(ide) {
       this.$swal({
-        title: '¿Desea Eliminar la Fecha Especial?',
+        title: '¿Desea Eliminar la Promoción?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#F25C05',
-        cancelButtonColor: '#383838',
+        cancelButtonColork: '#383838',
         confirmButtonText: 'Eliminar',
         cancelButtonText: 'Cancelar',
       }).then(async (result) => {
@@ -411,10 +417,7 @@ export default {
             campo: 'estado',
             dato: 3,
           }
-          const e = await axios.patch(
-            env.endpoint + '/fechasEspeciales.php',
-            js
-          )
+          const e = await axios.patch(env.endpoint + '/promociones.php', js)
 
           this.alertCambio(e.data.data, e.data.message)
           this.actualizarPromo()
@@ -526,9 +529,9 @@ export default {
                 const h = []
 
                 this.horarios.forEach((element) => {
-                  if (element.valor === true) {
+                  if (element.abre === true) {
                     d += '1'
-                    const ho = element.hora[0] + '-' + element.hora[1]
+                    const ho = element.horario[0] + '-' + element.horario[1]
                     h.push(ho)
                   } else {
                     d += '0'
@@ -609,9 +612,10 @@ export default {
       this.viernesPromo = !!pr.dias[4].valido
       this.sabadoPromo = !!pr.dias[5].valido
       this.domingoPromo = !!pr.dias[6].valido */
-      this.horarios = pr.dias.forEach((element, i) => {
-        this.horarios[i].valor = element.abre
-        this.horarios[i].hora = element.horario
+
+      pr.dias.forEach((element, i) => {
+        this.horarios[i].abre = element.abre
+        this.horarios[i].horario = element.horario
       })
     },
     vaciarPromo() {
@@ -634,13 +638,13 @@ export default {
       this.descripcionPromo = null
       this.precioAnterior = null
       this.horarios = [
-        { dia: 'Lunes', valor: false, hora: ['08:00', '20:00'] },
-        { dia: 'Martes', valor: false, hora: ['08:00', '20:00'] },
-        { dia: 'Miércoles', valor: false, hora: ['08:00', '20:00'] },
-        { dia: 'Jueves', valor: false, hora: ['08:00', '20:00'] },
-        { dia: 'Viernes', valor: false, hora: ['08:00', '20:00'] },
-        { dia: 'Sábado', valor: false, hora: ['08:00', '20:00'] },
-        { dia: 'Domingo', valor: false, hora: ['08:00', '20:00'] },
+        { dia: 'Lunes', abre: false, horario: ['08:00', '20:00'] },
+        { dia: 'Martes', abre: false, horario: ['08:00', '20:00'] },
+        { dia: 'Miércoles', abre: false, horario: ['08:00', '20:00'] },
+        { dia: 'Jueves', abre: false, horario: ['08:00', '20:00'] },
+        { dia: 'Viernes', abre: false, horario: ['08:00', '20:00'] },
+        { dia: 'Sábado', abre: false, horario: ['08:00', '20:00'] },
+        { dia: 'Domingo', abre: false, horario: ['08:00', '20:00'] },
       ]
       /*  this.lunesPromo = false
       this.martesPromo = false
@@ -720,9 +724,9 @@ export default {
                   const h = []
 
                   this.horarios.forEach((element) => {
-                    if (element.valor === true) {
+                    if (element.abre === true) {
                       d += '1'
-                      const ho = element.hora[0] + '-' + element.hora[1]
+                      const ho = element.horario[0] + '-' + element.horario[1]
                       h.push(ho)
                     } else {
                       d += '0'
@@ -824,9 +828,9 @@ export default {
           const h = []
 
           this.horarios.forEach((element) => {
-            if (element.valor === true) {
+            if (element.abre === true) {
               d += '1'
-              const ho = element.hora[0] + '-' + element.hora[1]
+              const ho = element.horario[0] + '-' + element.horario[1]
               h.push(ho)
             } else {
               d += '0'
