@@ -404,7 +404,7 @@ export default {
           this.enviarJson()
         }
       } else {
-        alert('Seleccione al menos un modo de atención')
+        alert('¡Llene correctamente los datos por favor!')
       }
     },
     abrirDialog() {

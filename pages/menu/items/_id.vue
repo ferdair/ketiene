@@ -292,7 +292,6 @@ export default {
       })
     }
 
-    alert(JSON.stringify(this.productosC))
     // Etiquetas de productos
 
     const e = await axios.get(env.endpoint + '/etiquetaProducto.php')
@@ -410,8 +409,6 @@ export default {
                   sucursaleExcluidas: '',
                   idTipoProductoDetalle: this.categoriaNueva,
                 }
-
-                await alert(JSON.stringify(js))
 
                 const r = await axios.post(env.endpoint + '/productos.php', js)
 
@@ -666,7 +663,6 @@ export default {
           this.vaciarProducto()
           this.cancelar()
           this.actualizarProductos()
-          alert(JSON.stringify(json))
         }
       }
     },

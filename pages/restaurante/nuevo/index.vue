@@ -854,7 +854,7 @@ export default {
         await this.subirImagen('logos', this.logo)
         await this.subirImagen('banners', this.banner)
       } else {
-        alert('Seleccione al menos un modo de atención')
+        alert('¡Llene correctamente los datos por favor!')
       }
     },
     abrirDialog() {

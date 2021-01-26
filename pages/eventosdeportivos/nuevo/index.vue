@@ -26,7 +26,6 @@
                 label="Subtítulo"
                 outlined
                 v-model="subtitulo"
-                :rules="subtituloRules"
               ></v-text-field>
             </v-col>
             <!-- <v-col cols="12" md="4">
@@ -127,7 +126,7 @@ export default {
     fechaInicio: '',
     fechaInicioRules: [(v) => !!v || 'La fecha de inicio es requerida'],
     subtitulo: '',
-    subtituloRules: [(v) => !!v || 'El subtítulo es requerido'],
+    // subtituloRules: [(v) => !!v || 'El subtítulo es requerido'],
     fechaFin: '',
     fechaFinRules: [(v) => !!v || 'La fecha de fin es requerida'],
     provincias: [],
@@ -192,7 +191,7 @@ export default {
           path: '/eventosdeportivos',
         })
       } else {
-        alert('Seleccione al menos un restaurante!')
+        alert('¡Llene correctamente los datos por favor!')
       }
     },
     alertRegistrar(respuesta, mensaje) {

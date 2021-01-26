@@ -87,7 +87,6 @@
                     <v-col cols="12">
                       <v-text-field
                         v-model="subtituloPromo"
-                        :rules="subtituloPromoRules"
                         label="Subtítulo"
                         required
                         outlined
@@ -322,10 +321,10 @@ export default {
     tituloPromo: null,
     tituloPromoRules: [(v) => !!v || 'Título es requerido'],
     subtituloPromo: null,
-    subtituloPromoRules: [(v) => !!v || 'Subtítulo es requerido'],
+    // subtituloPromoRules: [(v) => !!v || 'Subtítulo es requerido'],
     precioPromo: null,
     precioPromoRules: [(v) => !!v || 'Precio es requerido'],
-    precioAnterior: null,
+    precioAnterior: '0',
     precioAnteriorRules: [(v) => !!v || 'Precio anterior es requerido'],
     etiquetaPromo: null,
     etiquetaPromoRules: [(v) => !!v || 'Etiqueta es requerido'],
@@ -334,6 +333,15 @@ export default {
     imagenUrl: '',
     descripcionPromo: '',
     horarios: [
+      { dia: 'Lunes', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Martes', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Miércoles', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Jueves', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Viernes', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Sábado', abre: false, horario: ['08:00', '20:00'] },
+      { dia: 'Domingo', abre: false, horario: ['08:00', '20:00'] },
+    ],
+    auxHorarios: [
       { dia: 'Lunes', abre: false, horario: ['08:00', '20:00'] },
       { dia: 'Martes', abre: false, horario: ['08:00', '20:00'] },
       { dia: 'Miércoles', abre: false, horario: ['08:00', '20:00'] },
@@ -353,9 +361,19 @@ export default {
     auxEstado: false,
     idPr: null,
   }),
-  mounted() {
+  async mounted() {
     this.idC = this.$route.params.id
 
+    const com = await axios.get(
+      env.endpoint + '/datosRestaurante.php?id=' + this.idC
+    )
+
+    com.data.data[0].sucursales[0].keMasTiene[0].dias.forEach((element, i) => {
+      // this.auxHorarios[i].abre = element.abre
+      this.auxHorarios[i].horario = element.horario
+    })
+
+    this.horarios = this.auxHorarios
     /*  const c = await axios.get(
       env.endpoint + '/promociones.php?restaurante=' + this.idC
     )
@@ -546,7 +564,7 @@ export default {
                   idComercio: this.idC,
                   precio: this.precioPromo,
                   imagen: downloadURL,
-                  precioAnterior: this.precioAnterior,
+                  precioAnterior: this.precioAnterior + '',
                   dias: d,
                   lunes: h[0],
                   martes: h[1],
@@ -604,7 +622,7 @@ export default {
       this.imagenUrl = pr.imagen
       this.auxImg = pr.imagen
       this.descripcionPromo = pr.descripcion
-      this.precioAnterior = pr.precioAnterior
+      this.precioAnterior = pr.precioAnterior + ''
       /*  this.lunesPromo = !!pr.dias[0].valido
       this.martesPromo = !!pr.dias[1].valido
       this.miercolesPromo = !!pr.dias[2].valido
@@ -636,16 +654,9 @@ export default {
       this.imagenUrl = ''
       this.auxImg = null
       this.descripcionPromo = null
-      this.precioAnterior = null
-      this.horarios = [
-        { dia: 'Lunes', abre: false, horario: ['08:00', '20:00'] },
-        { dia: 'Martes', abre: false, horario: ['08:00', '20:00'] },
-        { dia: 'Miércoles', abre: false, horario: ['08:00', '20:00'] },
-        { dia: 'Jueves', abre: false, horario: ['08:00', '20:00'] },
-        { dia: 'Viernes', abre: false, horario: ['08:00', '20:00'] },
-        { dia: 'Sábado', abre: false, horario: ['08:00', '20:00'] },
-        { dia: 'Domingo', abre: false, horario: ['08:00', '20:00'] },
-      ]
+      this.precioAnterior = '0'
+
+      this.horarios = this.auxHorarios
       /*  this.lunesPromo = false
       this.martesPromo = false
       this.miercolesPromo = false
@@ -775,7 +786,6 @@ export default {
                     d += '0'
                   } */
 
-                  alert(d)
                   /*                   const e = this.auxEstado === true ? 1 : 0
                    */
                   const pe = {
@@ -786,7 +796,7 @@ export default {
                     idComercio: this.idC,
                     precio: this.precioPromo,
                     imagen: downloadURL,
-                    precioAnterior: this.precioAnterior,
+                    precioAnterior: this.precioAnterior + '',
                     dias: d,
                     estado: this.auxEstado,
                     observaciones: 'S/O',
@@ -887,7 +897,7 @@ export default {
             idComercio: this.idC,
             precio: this.precioPromo,
             imagen: this.auxImg,
-            precioAnterior: this.precioAnterior,
+            precioAnterior: this.precioAnterior + '',
             dias: d,
             estado: this.auxEstado,
             observaciones: 'S/O',
